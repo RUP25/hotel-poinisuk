@@ -1,23 +1,24 @@
 // pages/index.tsx
 import React from 'react';
-import { Box, Typography, useTheme } from '@mui/material';
-import Slider from 'react-slick';
+import { Box, Typography, useTheme, useMediaQuery } from '@mui/material';
+import dynamic from 'next/dynamic';
 
+import NavBar from '@/components/Navbar';
+import Ticker from '@/components/Ticker';
 import AvailabilityForm from '@/components/AvailabilityForm';
 import WelcomeSection from '@/components/WelcomeSection';
 import FeaturesSection from '@/components/FeatureSection';
 import BanquetPage from './banquet';
 import ContactSection from '@/components/ContactSection';
+import Footer from '@/components/Footer';
 
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import NavBar from '@/components/Navbar';
 
-const heroImages = [
-  '/images/image4.jpg',
-  '/images/image2.jpg',
-  '/images/image5.jpg',
-];
+// Avoid SSR issues with react-slick
+const Slider = dynamic(() => import('react-slick'), { ssr: false });
+
+const heroImages = ['/images/image1.webp', '/images/image2.jpg', '/images/image5.jpg'];
 
 const features = [
   { title: 'Rooms & Suites', subtitle: 'Exceptional Accommodations', image: '/images/room1.jpg', href: '/rooms' },
@@ -31,8 +32,29 @@ const features = [
   { title: 'Banquet Hall', subtitle: 'Perfect for Events', image: '/images/banquet.avif', href: '#banquet' },
 ];
 
+const latestNews = [
+  'Summer rooftop special at Dopwai now live!',
+  '10% off Deluxe rooms if you book 30+ days in advance',
+  'Spread Eagle Falls guided tours every weekend',
+  'New in-house night club opening this Friday',
+];
+
 export default function Home() {
   const theme = useTheme();
+
+  // Media queries
+  const isSmUp = useMediaQuery(theme.breakpoints.up('sm'));
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
+  const isLgUp = useMediaQuery(theme.breakpoints.up('lg'));
+  const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+
+  // Responsive hero height
+  const heroHeight = isLgUp ? '100vh' : isMdUp ? '92vh' : isSmUp ? '85vh' : '78vh';
+
+  // Typography sizes
+  const headingFontSize = isLgUp ? '3.25rem' : isMdUp ? '2.75rem' : isSmUp ? '2.25rem' : '1.9rem';
+  const subheadingFontSize = isMdUp ? '1.4rem' : isSmUp ? '1.2rem' : '1.05rem';
+  const titleTopMargin = isLgUp ? 4 : isMdUp ? 4 : isSmUp ? 3 : 3; // theme.spacing units
 
   const handleCheckRates = (
     checkIn: Date | null,
@@ -43,84 +65,168 @@ export default function Home() {
     console.log({ checkIn, checkOut, guests, children });
   };
 
+  // Slider perf tweaks for mobile and reduced motion
+  const sliderProps = {
+    autoplay: !prefersReducedMotion,
+    autoplaySpeed: prefersReducedMotion ? 0 : 5000,
+    infinite: true,
+    speed: prefersReducedMotion ? 0 : 900,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: false,
+    dots: false,
+    fade: !prefersReducedMotion,
+    pauseOnHover: true,
+    adaptiveHeight: false,
+  } as const;
+
   return (
     <>
-      {/* Full-screen hero slider */}
-      <Box sx={{ position: 'relative', height: '100vh', zIndex: 0 }}>
-        <Slider
-          autoplay
-          autoplaySpeed={5000}
-          infinite
-          speed={1000}
-          slidesToShow={1}
-          slidesToScroll={1}
-          arrows={false}
-          dots={false}
-          fade
+      {/* ─── HERO ─── */}
+      <Box
+        sx={{
+          position: 'relative',
+          height: heroHeight,
+          zIndex: 0,
+          // Use dynamic viewport units on mobile for better address-bar handling
+          '@supports (height: 100dvh)': {
+            height: { xs: '100dvh', sm: heroHeight },
+          },
+          overflow: 'hidden',
+        }}
+      >
+        {/* Slider layer (fills the hero height) */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            // Make Slick internals respect full height
+            '& .slick-slider, & .slick-list, & .slick-track': {
+              height: '100%',
+            },
+            '& .slick-slide > div': {
+              height: '100%',
+            },
+          }}
         >
-          {heroImages.map((url, idx) => (
-            <Box
-              key={idx}
-              sx={{
-                height: '100vh',
-                backgroundImage: `url(${url})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                animation: 'kenburns 5s ease-in-out',
-              }}
-            />
-          ))}
-        </Slider>
-    
+          <Slider {...sliderProps}>
+            {heroImages.map((url, idx) => (
+              <Box
+                key={idx}
+                sx={{
+                  width: '100%',
+                  height: '100%', // important: give each slide an explicit height
+                  backgroundImage: `url(${url})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  animation: prefersReducedMotion ? 'none' : 'kenburns 6s ease-in-out forwards',
+                  willChange: prefersReducedMotion ? 'auto' : 'transform',
+                }}
+              />
+            ))}
+          </Slider>
+        </Box>
 
-        {/* Custom CSS for Ken Burns effect */}
         <style>
           {`
             @keyframes kenburns {
-              0% {
-                transform: scale(1);
-              }
-              100% {
-                transform: scale(1.1);
-              }
+              0% { transform: scale(1) translate(0, 0); }
+              100% { transform: scale(1.08) translate(-1.5%, -1.5%); }
             }
           `}
         </style>
 
-        {/* Overlay */}
+        {/* Overlay for readability */}
         <Box sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.4)' }} />
 
-        {/* Hero content */}
+        {/* Foreground content */}
         <Box
           sx={{
-            position: 'absolute',
+            position: 'relative',
             inset: 0,
             zIndex: 1,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
+            pt: { xs: 10, sm: 12, md: 15 },
+            px: 1,
             color: '#fff',
             textAlign: 'center',
-            px: 2,
           }}
         >
+          {/* Ticker */}
+          <Box
+            component="section"
+            role="region"
+            aria-label="Latest updates"
+            sx={{
+              width: '100%',
+              px: { xs: 1.25, sm: 3, md: 4 },
+              mt: { xs: 4, sm: 3, md: 6 },
+              display: { xs: 'block', sm: 'block' },
+            }}
+          >
+            <Box
+              sx={{
+                maxWidth: 1600,
+                mx: 'auto',
+                backgroundColor: 'rgba(0,0,0,0.55)',
+                borderRadius: 1,
+                py: { xs: 0.25, sm: 0.5 },
+                '& *': { fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1rem' } },
+              }}
+            >
+              <Ticker items={latestNews} duration={isMdUp ? '20s' : '24s'} />
+            </Box>
+          </Box>
+
           <NavBar />
-          <Typography variant="h2" gutterBottom sx={{ fontFamily: 'Georgia, serif', fontWeight: 400, mt:5 }}>
+
+          {/* Headings */}
+          <Typography
+            component="h1"
+            gutterBottom
+            sx={{
+              fontFamily: 'Georgia, serif',
+              fontWeight: 400,
+              mt: titleTopMargin,
+              fontSize: headingFontSize,
+              lineHeight: 1.15,
+              textShadow: '2px 2px 8px rgba(0,0,0,0.45)',
+              px: { xs: 1, sm: 0 },
+            }}
+          >
             Welcome to Hotel Poinisuk
           </Typography>
-          <Typography variant="h5" gutterBottom sx={{ fontFamily: 'Georgia, serif' }}>
+
+          <Typography
+            component="p"
+            gutterBottom
+            sx={{
+              fontFamily: 'Georgia, serif',
+              fontSize: subheadingFontSize,
+              opacity: 0.95,
+              textShadow: '1px 1px 6px rgba(0,0,0,0.45)',
+              maxWidth: { xs: 600, md: 900 },
+              mx: 'auto',
+              px: { xs: 1, sm: 0 },
+            }}
+          >
             Mesmerizing views & modern comfort in the heart of Shillong
           </Typography>
 
+          {/* Availability Form container */}
           <Box
             sx={{
-              mt: 4,
-              width: { xs: '100%', sm: '90%', md: '80%', lg: '60%' },
-              p: { xs: 2, md: 4 },
-              bgcolor: 'transparent',
-              backdropFilter: 'blur(6px)',
-              '& .MuiFilledInput-root, & .MuiOutlinedInput-root': { bgcolor: 'transparent' },
+              width: { xs: '86%', sm: '92%', md: '90%', lg: '70%' },
+              p: { xs: 1.25, sm: 2, md: 6, lg: 8 },
+              mb: { xs: 2, sm: 10, md: 15 },
+              bgcolor: 'rgba(255,255,255,0.10)',
+              backdropFilter: 'blur(8px)',
+              borderRadius: 2,
+              boxShadow: '0 6px 26px rgba(0,0,0,0.35)',
+              '& .MuiFormControl-root': { minWidth: 0 },
+              '& .MuiInputBase-root': { fontSize: { xs: '0.9rem', sm: '1rem' } },
             }}
           >
             <AvailabilityForm onCheckRates={handleCheckRates} />
@@ -128,7 +234,7 @@ export default function Home() {
         </Box>
       </Box>
 
-      {/* Main content */}
+      {/* ─── MAIN CONTENT ─── */}
       <Box component="main">
         <WelcomeSection />
         <FeaturesSection features={features} />
@@ -137,6 +243,8 @@ export default function Home() {
         </Box>
         <ContactSection />
       </Box>
+
+      <Footer />
     </>
   );
 }
