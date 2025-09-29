@@ -1,6 +1,7 @@
 // components/HamburgerMenu.tsx
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import {
   IconButton,
   Drawer,
@@ -9,6 +10,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Divider,
   Box,
   Button,
   Typography,
@@ -25,10 +27,10 @@ import GavelIcon from "@mui/icons-material/Gavel";
 const menuItems = [
   { label: "Home",           href: "/",      icon: <HomeIcon /> },
   { label: "Rooms & Suites", href: "/rooms", icon: <KingBedIcon /> },
-  { label: "Dine In",        href: "/dine",  icon: <RestaurantIcon /> },
-  { label: "Bar & Lounge",   href: "/klong", icon: <LocalBarIcon /> },
-  { label: "About Us",       href: "#about", icon: <InfoIcon /> },
-  { label: "Hotel T&C",      href: "#terms", icon: <GavelIcon /> },
+  { label: "Dopwai Dine",        href: "/dine",  icon: <RestaurantIcon /> },
+  { label: "Klong Bar",   href: "/klong", icon: <LocalBarIcon /> },
+  { label: "About Us",       href: "/about", icon: <InfoIcon /> },
+  { label: "Hotel T&C",      href: "/terms", icon: <GavelIcon /> },
 ];
 
 interface Props {
@@ -37,77 +39,12 @@ interface Props {
 }
 
 const HamburgerMenu: React.FC<Props> = ({ open, setOpen }) => {
+  const router = useRouter();
   const toggleDrawer = (state: boolean) => () => setOpen(state);
-
-  // reusable 3D/extruded text style (also applied to "MENU")
-  const threeDTextSx = {
-    fontFamily: "'Montserrat', sans-serif",
-    fontWeight: 800,
-    letterSpacing: 1.2,
-    color: "#fff",
-    textTransform: "uppercase",
-    textShadow:
-      "0 1px 0 #cfcfcf, 0 2px 0 #bfbfbf, 0 3px 0 #afafaf, 0 4px 0 #9f9f9f, 0 5px 0 #8f8f8f, 0 6px 8px rgba(0,0,0,0.35)",
-  } as const;
-
-  // 3D pill/button effect shared by each item
-  const threeDItemSx = {
-    my: 1,
-    mx: 2,
-    py: 1.25,
-    px: 1.5,
-    borderRadius: 2,
-    backdropFilter: "blur(2px)",
-    background:
-      "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06))",
-    boxShadow:
-      "0 6px 0 rgba(0,0,0,0.35), 0 10px 18px rgba(0,0,0,0.25)",
-    transform: "translateY(0)",
-    transition: "transform .15s ease, box-shadow .15s ease, background .15s ease",
-    "&:hover": {
-      transform: "translateY(-2px)",
-      boxShadow:
-        "0 8px 0 rgba(0,0,0,0.35), 0 16px 22px rgba(0,0,0,0.28)",
-      background:
-        "linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0.08))",
-    },
-    "&:active": {
-      transform: "translateY(2px)",
-      boxShadow:
-        "0 3px 0 rgba(0,0,0,0.35), 0 8px 14px rgba(0,0,0,0.22)",
-    },
-    color: "common.white",
-    textDecoration: "none",
-  } as const;
-
-  // 3D-style "Cancel" button on the right of the header
-  const cancelBtnSx = {
-    color: "white",
-    px: 1.75,
-    py: 0.75,
-    borderRadius: 999,
-    background:
-      "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06))",
-    border: "1px solid rgba(255,255,255,0.25)",
-    boxShadow:
-      "0 6px 0 rgba(0,0,0,0.35), 0 10px 18px rgba(0,0,0,0.25), inset 0 1px rgba(255,255,255,0.35)",
-    transition: "transform .15s ease, box-shadow .15s ease, background .15s ease",
-    "&:hover": {
-      background:
-        "linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08))",
-      boxShadow:
-        "0 8px 0 rgba(0,0,0,0.35), 0 16px 22px rgba(0,0,0,0.28), inset 0 1px rgba(255,255,255,0.4)",
-    },
-    "&:active": {
-      transform: "translateY(2px)",
-      boxShadow:
-        "0 3px 0 rgba(0,0,0,0.35), 0 8px 14px rgba(0,0,0,0.22), inset 0 1px rgba(255,255,255,0.4)",
-    },
-  } as const;
 
   return (
     <>
-      {/* Hamburger icon */}
+      {/* Trigger button */}
       <IconButton
         onClick={toggleDrawer(true)}
         aria-label="Open navigation menu"
@@ -121,113 +58,151 @@ const HamburgerMenu: React.FC<Props> = ({ open, setOpen }) => {
         open={open}
         onClose={toggleDrawer(false)}
         PaperProps={{
+          // Minimal, elegant surface: no heavy shadows
           sx: {
             width: { xs: 300, sm: 340, md: 360 },
-            overflow: "hidden",
-            position: "relative",
-            background:
-              "linear-gradient(180deg, rgba(10,10,10,0.9), rgba(20,20,20,0.94))",
+            bgcolor: "rgba(24,24,26,0.82)",
+            backdropFilter: "blur(8px)",
+            borderRight: "1px solid rgba(255,255,255,0.08)",
+            boxShadow: "none",
           },
         }}
       >
-        {/* Background emblem with blur */}
+        {/* Header */}
         <Box
           sx={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage: "url('/images/logo1.png')",
-            backgroundSize: "contain",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            filter: "blur(10px)",
-            opacity: 0.25,
-            zIndex: 0,
-          }}
-        />
-
-        {/* Soft overlay */}
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            bgcolor: "rgba(0,0,0,0.35)",
-            zIndex: 1,
-          }}
-        />
-
-        {/* HEADER: 'MENU' on left + Cancel on right */}
-        <Box
-          sx={{
-            position: "relative",
-            zIndex: 2,
-            px: 2,
-            py: 2,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            borderBottom: "1px solid rgba(255,255,255,0.12)",
-            boxShadow: "0 6px 12px rgba(0,0,0,0.25)",
+            px: 2,
+            py: 1.75,
           }}
         >
-          <Typography component="div" sx={{ ...threeDTextSx, fontSize: "1.35rem" }}>
+          <Typography
+            component="h2"
+            variant="subtitle1"
+            sx={{
+              color: "#fff",
+              fontWeight: 700,
+              letterSpacing: 0.6,
+              textTransform: "uppercase",
+            }}
+          >
             Menu
           </Typography>
 
           <Button
             onClick={toggleDrawer(false)}
-            aria-label="Cancel and close menu"
+            aria-label="Close menu"
             startIcon={<CloseIcon />}
-            sx={cancelBtnSx}
+            sx={{
+              color: "#eaeaea",
+              px: 1.25,
+              py: 0.6,
+              minWidth: 0,
+              borderRadius: 999,
+              border: "1px solid rgba(255,255,255,0.18)",
+              background: "transparent",
+              "&:hover": {
+                background: "rgba(255,255,255,0.06)",
+              },
+              "&:focus-visible": {
+                outline: "2px solid #ffffff",
+                outlineOffset: 2,
+              },
+            }}
           >
-            Cancel
+            Close
           </Button>
         </Box>
 
-        {/* MENU ITEMS */}
+        <Divider sx={{ borderColor: "rgba(255,255,255,0.08)" }} />
+
+        {/* Nav list */}
         <Box
-          sx={{
-            position: "relative",
-            zIndex: 2,
-            height: "100%",
-            pt: 1,
-            pb: 3,
-          }}
           role="presentation"
-          onClick={toggleDrawer(false)}
-          onKeyDown={toggleDrawer(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setOpen(false);
+          }}
+          sx={{ py: 0.5 }}
         >
-          <List sx={{ py: 0 }}>
-            {menuItems.map((item) => (
-              <ListItem key={item.label} disablePadding sx={{ px: 0 }}>
-                <ListItemButton
-                  component={Link}
-                  href={item.href}
-                  sx={threeDItemSx}
-                >
-                  <ListItemIcon sx={{ minWidth: 36, color: "primary.light" }}>
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={item.label}
-                    slotProps={{
-                      primary: {
-                        sx: {
-                          ...threeDTextSx,
-                          // lighter/thinner for items
-                          fontWeight: 700,
-                          letterSpacing: 0.8,
-                          textTransform: "none",
-                          fontSize: "1.1rem",
-                          textShadow:
-                            "0 1px 0 #bfbfbf, 0 2px 0 #a9a9a9, 0 3px 6px rgba(0,0,0,0.35)",
-                        },
+          <List sx={{ p: 0 }}>
+            {menuItems.map((item) => {
+              const active = router.pathname === item.href;
+              return (
+                <ListItem key={item.href} disablePadding>
+                  <ListItemButton
+                    component={Link}
+                    href={item.href}
+                    onClick={toggleDrawer(false)}
+                    disableRipple
+                    sx={{
+                      // Minimal row: no box shadow, subtle hover fill, crisp divider
+                      py: 1.25,
+                      px: 2,
+                      gap: 1.25,
+                      color: "#f2f2f2",
+                      borderBottom: "1px solid rgba(255,255,255,0.06)",
+                      transition: "background-color .15s ease, color .15s ease, padding-left .15s ease",
+                      "&:hover": {
+                        backgroundColor: "rgba(255,255,255,0.06)",
                       },
+                      "&:focus-visible": {
+                        outline: "2px solid #ffffff",
+                        outlineOffset: -2,
+                      },
+                      // left active indicator
+                      position: "relative",
+                      pl: active ? 2.5 : 2,
+                      "&::before": active
+                        ? {
+                            content: '""',
+                            position: "absolute",
+                            left: 0,
+                            top: 8,
+                            bottom: 8,
+                            width: 3,
+                            borderRadius: 2,
+                            background:
+                              "linear-gradient(180deg, #caa6ff, #7f4dff)",
+                          }
+                        : {},
                     }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 36,
+                        color: active ? "#caa6ff" : "rgba(255,255,255,0.8)",
+                        transition: "color .15s ease",
+                      }}
+                    >
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={item.label}
+                      sx={{
+                        "& .MuiListItemText-primary": {
+                          fontWeight: active ? 700 : 500,
+                          letterSpacing: 0.2,
+                          color: active ? "#ffffff" : "rgba(255,255,255,0.92)",
+                        },
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
           </List>
+        </Box>
+
+        {/* Footer microcopy (optional) */}
+        <Box sx={{ mt: "auto", px: 2, py: 2 }}>
+          <Typography
+            variant="caption"
+            sx={{ color: "rgba(255,255,255,0.6)" }}
+          >
+            © {new Date().getFullYear()} Hotel Poinisuk
+          </Typography>
         </Box>
       </Drawer>
     </>

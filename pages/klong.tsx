@@ -1,6 +1,5 @@
 // pages/klong.tsx
 import React from "react";
-import Head from "next/head";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import {
@@ -10,25 +9,28 @@ import {
   Typography,
   GlobalStyles,
   useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import Footer from "@/components/Footer";
+import MastheadSlider from "@/components/MastheadSlider";
+import type { NextPageWithSeo } from "@/types/next-page-with-seo";
 
+// Client-only slick
+const Slider = dynamic(() => import("react-slick"), { ssr: false });
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-const Slider = dynamic(() => import("react-slick"), { ssr: false });
+const KlongPage: NextPageWithSeo = () => {
+  const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true });
+  const brown = "#5a4235";
 
-const KlongPage: React.FC = () => {
-  const theme = useTheme();
-  const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
-
+  // Right-side gallery images
   const images = [
-    "/images/bar/klong-bar1.jpg",
-    "/images/bar/klong-bar.jpg",
+    "/images/bar/klongbar1.jpg",
+    "/images/bar/klongbar.jpg",
     "/images/bar/bar.jpg",
-    "/images/bar/masthead.jpeg",
     "/images/bar/masthead1.jpeg",
+    "/images/bar/bar4.jpg",
+    "/images/bar/bar3.jpg",
   ];
 
   const sliderSettings = {
@@ -39,219 +41,274 @@ const KlongPage: React.FC = () => {
     autoplaySpeed: 4000,
     slidesToShow: 1,
     slidesToScroll: 1,
-    arrows: false,
+    arrows: true,
     pauseOnHover: true,
+    adaptiveHeight: false,
+    cssEase: "ease",
   } as const;
+
+  // subtle entrance
+  const fadeIn = {
+    "@keyframes fadeIn": {
+      "0%": { opacity: 0, transform: "translateY(12px)" },
+      "100%": { opacity: 1, transform: "translateY(0)" },
+    },
+  };
 
   return (
     <main>
-      <Head>
-        <title>Klong Lounge | Hotel Poinisuk</title>
-        <meta
-          name="description"
-          content="Relax at Klong Lounge in Hotel Poinisuk — live music, karaoke, curated drinks, and vibrant ambience in Shillong."
-        />
-      </Head>
-
+      {/* global fixes (slick sizing + layout) */}
       <GlobalStyles
         styles={{
           "*,*::before,*::after": { boxSizing: "border-box" },
           html: { width: "100%" },
           body: { width: "100%", margin: 0, overflowX: "hidden" },
           main: { width: "100%", maxWidth: "100vw" },
-          // don’t force heights globally; we’ll do it inside the ratio wrapper
-          ".slick-slider,.slick-list,.slick-track": { width: "100%" },
+          ".slick-slider,.slick-list,.slick-track": { width: "100%", height: "100%" },
+          ".slick-track": { display: "flex" },
+          ".slick-slide": { height: "100%" },
+          ".slick-slide > div": { height: "100%" },
         }}
       />
 
-      {/* Masthead */}
-      <Box
-        sx={{
-          position: "relative",
-          width: "100%",
-          height: { xs: 220, sm: 240, md: 300, lg: 360 },
-          backgroundImage: "url('/images/bar/masthead.jpeg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+      {/* ─── 3-image Ken Burns Masthead ─── */}
+      <MastheadSlider
+        images={[
+          "/images/bar/masthead.jpeg",
+          "/images/bar/masthead1.jpeg",
+          "/images/bar/klongbar1.jpg",
+        ]}
+        height={{ xs: 220, md: 360 }}
+        overlayColor="rgba(0,0,0,.45)"
+        animationDuration="20s"
+        scale={1.12}
+        align="center"
+        contentPadding={{ xs: 2, md: 4 }}
+        dots
+        arrows={false}
+        fade
       >
-        <Box sx={{ position: "absolute", inset: 0, bgcolor: "rgba(0,0,0,.45)" }} />
         <Container
           sx={{
-            position: "relative",
             height: "100%",
             display: "flex",
             alignItems: "center",
-            justifyContent: { xs: "center", md: "flex-end" },
+            justifyContent: "center",
             px: { xs: 2, sm: 3, md: 4 },
             minWidth: 0,
           }}
         >
           <Typography
             sx={{
-              display: { xs: "none", sm: "block" },
               color: "#fff",
-              fontWeight: 700,
+              fontWeight: 800,
               letterSpacing: 0.5,
               textShadow: "0 2px 12px rgba(0,0,0,.35)",
-              fontSize: { sm: "clamp(1.6rem, 4.5vw, 2.6rem)" },
+              fontSize: { xs: "1.6rem", sm: "clamp(1.6rem, 4.5vw, 2.6rem)" },
             }}
           >
             Klong Lounge
           </Typography>
         </Container>
-      </Box>
+      </MastheadSlider>
 
-      {/* Content */}
-      <Container
-        maxWidth="lg"
+      {/* ─── Content section with background image ─── */}
+      <Box
         sx={{
-          pt: { xs: 3, sm: 4, md: 5 },
-          pb: { xs: 5, sm: 6, md: 8 },
-          px: { xs: 2, sm: 3, md: 4 },
-          minWidth: 0,
+          backgroundImage: "url('/images/bar/content-bg.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          position: "relative",
         }}
       >
         <Box
           sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-            columnGap: { xs: 0, sm: 4, lg: 6 },
-            rowGap: { xs: 3, sm: 4 },
-            alignItems: "start",
-            minWidth: 0,
+            position: "relative",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(to bottom, rgba(255,255,255,0.86), rgba(255,255,255,0.92))",
+              pointerEvents: "none",
+            },
           }}
         >
-          {/* Text */}
-          <Box
+          <Container
+            maxWidth="lg"
             sx={{
-              gridColumn: { xs: "1 / -1", md: "1 / 2" },
-              alignSelf: "start",
+              position: "relative",
+              pt: { xs: 4, sm: 5, md: 6 },
+              pb: { xs: 6, sm: 7, md: 9 },
+              px: { xs: 2, sm: 3, md: 4 },
               minWidth: 0,
             }}
           >
-            <Typography
-              component="h1"
-              gutterBottom
-              sx={{
-                mt: 0,
-                fontWeight: 700,
-                letterSpacing: 0.4,
-                fontSize: { xs: "clamp(1.4rem, 6vw, 1.9rem)", md: "2.2rem" },
-                lineHeight: 1.15,
-              }}
-            >
-              Klong Lounge
-            </Typography>
-
-            <Typography
-              variant="body1"
-              gutterBottom
-              sx={{
-                color: "text.secondary",
-                fontSize: { xs: "1rem", sm: "1.05rem", md: "1.1rem" },
-                lineHeight: { xs: 1.7, md: 1.8 },
-                mb: { xs: 1.25, sm: 1.5 },
-                textAlign: "justify",
-              }}
-            >
-              The lounge bar reiterates comfort and style—a kindred spirit in
-              ambience. It thrives on its pep atmosphere to allow savouring of
-              beverages amidst complete tranquillity.
-            </Typography>
-
-            <Typography
-              variant="body1"
-              gutterBottom
-              sx={{
-                color: "text.secondary",
-                fontSize: { xs: "1rem", sm: "1.05rem", md: "1.1rem" },
-                lineHeight: { xs: 1.7, md: 1.8 },
-                mb: { xs: 2, sm: 2.5 },
-                textAlign: "justify",
-              }}
-            >
-              Aptly manned by master bartenders, there’s a drink for every mood
-              and every soul to match the pulsating vibes of energy.
-            </Typography>
-
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: { xs: 1, sm: 1.5 } }}>
-              Entertainment:
-            </Typography>
-            <Typography variant="body2" sx={{ mb: { xs: 1.5, sm: 2 } }}>
-              Live Music & Karaoke
-            </Typography>
-
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: { xs: 1, sm: 1.5 } }}>
-              Timing:
-            </Typography>
-            <Typography variant="body2">13:00 hrs – 22:30 hrs</Typography>
-
             <Box
               sx={{
-                mt: { xs: 2.5, sm: 3 },
-                display: "flex",
-                gap: 2,
-                flexDirection: { xs: "column", sm: "row" },
-                alignItems: { xs: "stretch", sm: "center" },
-              }}
-            >
-              <Button variant="contained" size="large" color="primary" href="/booking">
-                Book Now
-              </Button>
-              <Button variant="outlined" size="large" color="primary" href="/bar/klong">
-                View More
-              </Button>
-            </Box>
-          </Box>
+                ...fadeIn,
+                animation: reduceMotion ? "none" : "fadeIn 0.7s ease-out",
 
-          {/* Slider */}
-          <Box
-            sx={{
-              gridColumn: { xs: "1 / -1", md: "2 / 3" },
-              alignSelf: "start",
-              width: "100%",
-              minWidth: 0,
-              borderRadius: { xs: 1.5, md: 2 },
-              overflow: "hidden",
-              "& .slick-list": { borderRadius: { xs: 1.5, md: 2 } },
-            }}
-          >
-            {/* Aspect-ratio wrapper that *also* forces slick internals to fill it */}
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                aspectRatio: { xs: "4 / 3", sm: "16 / 10", md: "16 / 9", lg: "10 / 9" },
-                minHeight: { xs: 260, sm: 320, md: 360 },
-                // CRUCIAL: make slick use this height instead of collapsing to 0
-                "& .slick-slider, & .slick-list, & .slick-track": { height: "100%" },
-                "& .slick-slide, & .slick-slide > div": { height: "100%" },
+                /* ⬇️ Use GRID with named areas to force order:
+                      - Mobile/Small: text first, slider second
+                      - md+: side-by-side
+                */
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                gridTemplateAreas: {
+                  xs: `"copy"
+                       "slider"`,
+                  md: `"copy slider"`,
+                },
+                alignItems: "stretch",
+                gap: { xs: 3.5, md: 5 },
               }}
             >
-              <Slider {...sliderSettings}>
-                {images.map((src, i) => (
-                  <Box key={i} sx={{ position: "relative", width: "100%", height: "100%" }}>
-                    <Image
-                      src={src}
-                      alt={`Klong Lounge slide ${i + 1}`}
-                      fill
-                      sizes="(max-width: 599px) 100vw, (max-width: 1199px) 50vw, 600px"
-                      style={{ objectFit: "cover" }}
-                      priority={i === 0}
-                      loading={i === 0 ? "eager" : "lazy"}
+              {/* LEFT: copy with faint building watermark */}
+              <Box
+                sx={{
+                  gridArea: "copy",
+                  position: "relative",
+                  pr: { md: 2 },
+                  minWidth: 0,
+                  "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    left: { xs: -12, md: -65 },
+                    bottom: { xs: -10, md: -20 },
+                    width: { xs: 220, sm: 260, md: 320 },
+                    height: { xs: 220, sm: 260, md: 320 },
+                    backgroundImage: "url('/images/klong.png')",
+                    backgroundRepeat: "no-repeat",
+                    backgroundSize: "contain",
+                    backgroundPosition: "left bottom",
+                    opacity: 0.2,
+                    pointerEvents: "none",
+                  },
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: `'Georgia','Times New Roman',serif`,
+                    fontStyle: "italic",
+                    color: "#6f5d52",
+                    mb: 1,
+                    letterSpacing: ".01em",
+                    fontSize: { xs: 18, md: 20 },
+                  }}
+                >
+                  At a Glance
+                </Typography>
+
+                <Typography
+                  component="h2"
+                  sx={{
+                    color: brown,
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: ".06em",
+                    lineHeight: 1.2,
+                    fontFamily: `'Montserrat','Helvetica Neue',Arial,sans-serif`,
+                    fontSize: { xs: "clamp(1.6rem, 5.5vw, 2.2rem)", md: "2.6rem" },
+                    mb: 1.25,
+                  }}
+                >
+                  Klong Lounge
+                </Typography>
+
+                {/* decorative squiggle */}
+                <Box aria-hidden sx={{ height: 18, mb: 2.5, "& svg": { display: "block" } }}>
+                  <svg width="90" height="18" viewBox="0 0 90 18" fill="none">
+                    <path
+                      d="M1 9c8-8 14 8 22 0s14 8 22 0 14 8 22 0 14 8 22 0"
+                      stroke={brown}
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      opacity="0.6"
                     />
-                  </Box>
-                ))}
-              </Slider>
+                  </svg>
+                </Box>
+
+                <Typography
+                  sx={{
+                    color: "text.secondary",
+                    fontSize: { xs: "1rem", sm: "1.05rem" },
+                    lineHeight: { xs: 1.8, md: 1.9 },
+                    maxWidth: 560,
+                    textAlign: "justify",
+                  }}
+                >
+                  The lounge bar reiterates comfort and style—a kindred spirit in ambience. It thrives
+                  on its pep atmosphere, letting you savour signature cocktails amidst complete
+                  tranquillity. Aptly manned by master bartenders, there’s a drink for every mood.
+                </Typography>
+
+                <Box sx={{ mt: 3, display: "flex", gap: 2, flexWrap: "wrap" }}>
+                  <Button variant="contained" size="large" color="primary" href="/booking">
+                    Book Now
+                  </Button>
+                  <Button variant="outlined" size="large" sx={{ borderColor: brown, color: brown }}>
+                    Our Story
+                  </Button>
+                </Box>
+              </Box>
+
+              {/* RIGHT: sliding images — visible on all screens */}
+              <Box
+                sx={{
+                  gridArea: "slider",
+                  position: "relative",
+                  minWidth: 0,
+                  borderRadius: 2,
+                  overflow: "hidden",
+                  boxShadow: "0 10px 26px rgba(0,0,0,.15)",
+
+                  /* Keep the slider visible:
+                     - explicit heights on small
+                     - aspect-ratio when supported
+                  */
+                  height: { xs: 260, sm: 320, md: "auto" },
+                  "@supports (aspect-ratio: 1 / 1)": {
+                    height: "auto",
+                    aspectRatio: { xs: "4 / 3", md: "16 / 9" },
+                  },
+
+                  "& .slick-slider, & .slick-list, & .slick-track, & .slick-slide > div": {
+                    height: "100%",
+                  },
+                }}
+              >
+                <Slider {...(sliderSettings as any)}>
+                  {images.map((src, i) => (
+                    <Box key={i} sx={{ position: "relative", width: "100%", height: "100%" }}>
+                      <Image
+                        src={src}
+                        alt={`Klong Lounge image ${i + 1}`}
+                        fill
+                        sizes="(max-width: 1199px) 100vw, 600px"
+                        style={{ objectFit: "cover" }}
+                        priority={i === 0}
+                      />
+                    </Box>
+                  ))}
+                </Slider>
+              </Box>
             </Box>
-          </Box>
+          </Container>
         </Box>
-      </Container>
+      </Box>
 
       <Footer />
     </main>
   );
+};
+
+// Page-level SEO
+KlongPage.seo = {
+  title: "Klong Lounge",
+  description: "Klong Lounge — live music, karaoke, and curated cocktails at Hotel Poinisuk, Shillong.",
+  ogImage: "/images/og/klong.jpg",
 };
 
 export default KlongPage;

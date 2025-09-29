@@ -1,19 +1,14 @@
 // pages/_document.tsx
-import Document, { Html, Head, Main, NextScript } from "next/document";
+import { Html, Head, Main, NextScript } from "next/document";
 
-export default class MyDocument extends Document {
-  render() {
-    return (
-      <Html lang="en">
-        <Head>
-          {/* Global head elements go here */}
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-        </Head>
-        <body>
-          <Main />
-          <NextScript />
-        </body>
-      </Html>
-    );
-  }
+export default function Document() {
+  return (
+    <Html lang="en-IN">
+      <Head>{/* static, site-wide tags only (e.g., font preconnects) */}</Head>
+      <body>
+        <Main />
+        <NextScript />
+      </body>
+    </Html>
+  );
 }

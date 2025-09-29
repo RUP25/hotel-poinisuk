@@ -23,6 +23,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
+
 /** Colors-only; sizes controlled via sx + responsive logic */
 const WhiteInputLabel = styled(InputLabel)({
   color: "#fff",
@@ -43,8 +44,8 @@ interface AvailabilityFormProps {
   onCheckRates: (
     checkIn: Date | null,
     checkOut: Date | null,
-    guests: number | "",
-    children: number | ""
+    guests: number,
+    children: number
   ) => void;
 }
 
@@ -52,18 +53,20 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
   const theme = useTheme();
 
   // Default MUI breakpoints
-  const isSmUp = useMediaQuery(theme.breakpoints.up("sm")); // ≥600
-  const isMdUp = useMediaQuery(theme.breakpoints.up("md")); // ≥900
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
 
-  // Micro-breakpoints inside "xs" (mobile) for finer control
-  const isXsTiny  = useMediaQuery("(max-width:360px)");                 // very small phones
+  // Micro-breakpoints
+  const isXsTiny = useMediaQuery("(max-width:360px)");
   const isXsSmall = useMediaQuery("(min-width:361px) and (max-width:420px)");
-  const isXsLarge = useMediaQuery("(min-width:421px) and (max-width:599px)"); // large phones
+  const isXsLarge = useMediaQuery("(min-width:421px) and (max-width:599px)");
 
   const [checkIn, setCheckIn] = useState<Date | null>(null);
   const [checkOut, setCheckOut] = useState<Date | null>(null);
-  const [guests, setGuests] = useState<number | "">("");
-  const [children, setChildren] = useState<number | "">("");
+
+  // Use -1 as "unselected" sentinel for selects (keeps type purely number)
+  const [guests, setGuests] = useState<number>(-1);
+  const [children, setChildren] = useState<number>(-1);
 
   const [openIn, setOpenIn] = useState(false);
   const [openOut, setOpenOut] = useState(false);
@@ -71,49 +74,53 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
   const [attempted, setAttempted] = useState(false);
   const [snackOpen, setSnackOpen] = useState(false);
 
+  // ⟵ NEW: SwiftBook hook (loads script & provides opener)
+
+
+  // Keep checkout > checkin
   useEffect(() => {
     if (checkIn && (!checkOut || checkOut <= checkIn)) {
       const nextDay = new Date(checkIn);
       nextDay.setDate(nextDay.getDate() + 1);
       setCheckOut(nextDay);
     }
-  }, [checkIn]);
+  }, [checkIn, checkOut]);
+
+  // helper for local YYYY-MM-DD (Asia/Kolkata)
+  const formatLocalYMD = (d: Date) => {
+    const y = d.getFullYear();
+    const m = `${d.getMonth() + 1}`.padStart(2, "0");
+    const day = `${d.getDate()}`.padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const valid =
-      !!checkIn && !!checkOut && checkOut > (checkIn as Date) && guests !== "" && children !== "";
+      !!checkIn &&
+      !!checkOut &&
+      checkOut > checkIn &&
+      guests !== -1 &&
+      children !== -1;
+
     if (!valid) {
       setAttempted(true);
       setSnackOpen(true);
       return;
     }
+
+    // Keep your existing callback (if needed elsewhere)
     onCheckRates(checkIn, checkOut, guests, children);
+
+  
   };
 
-  // Sizing tuned per micro-breakpoint
-  const controlFontSize =
-    isMdUp ? "1.1rem"
-    : isSmUp ? "1.05rem"
-    : isXsLarge ? "1.0rem"
-    : isXsSmall ? "0.95rem"
-    : "0.9rem";
+  // --- AUTO-SHRINK ---
+  const controlFontSize = "clamp(0.9rem, 2.2vw, 1.1rem)";
+  const baseFieldHeight = "clamp(40px, 6vw, 52px)";
+  const iconSize = isMdUp ? 28 : isSmUp ? 24 : 22;
 
-  const baseFieldHeight =
-    isMdUp ? 52
-    : isSmUp ? 48
-    : isXsLarge ? 46
-    : isXsSmall ? 44
-    : 40;
-
-  const iconSize =
-    isMdUp ? 28
-    : isSmUp ? 24
-    : isXsLarge ? 22
-    : isXsSmall ? 21
-    : 20;
-
-  // Compute grid layout per size
+  // Layout grid
   let gridTemplateAreas: string;
   let gridTemplateColumns: any;
   let gap = 2.5;
@@ -122,27 +129,16 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
   if (isMdUp) {
     gridTemplateAreas = `"checkin checkout guests children button"`;
     gridTemplateColumns = "1.25fr 1.25fr 1fr 1fr 0.9fr";
-    gap = 2.5; pad = 3;
-  } else if (isSmUp) {
-    // tablets (600–899) → 2x2 + full-width button
+  } else if (isSmUp || isXsLarge) {
     gridTemplateAreas = `
       "checkin  checkout"
       "guests   children"
       "button   button"
     `;
     gridTemplateColumns = "1fr 1fr";
-    gap = 1.5; pad = 2;
-  } else if (isXsLarge) {
-    // large phones (421–599) → same as tablets, but tighter
-    gridTemplateAreas = `
-      "checkin  checkout"
-      "guests   children"
-      "button   button"
-    `;
-    gridTemplateColumns = "1fr 1fr";
-    gap = 1.25; pad = 1.25;
-  } else if (isXsSmall) {
-    // small phones (361–420) → stacked single column
+    gap = 1.5;
+    pad = 2.25;
+  } else if (isXsSmall || isXsTiny) {
     gridTemplateAreas = `
       "checkin"
       "checkout"
@@ -151,9 +147,9 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
       "button"
     `;
     gridTemplateColumns = "1fr";
-    gap = 1.0; pad = 1.0;
+    gap = 1.0;
+    pad = 1.0;
   } else {
-    // very small phones (≤360) → ultra compact stacked
     gridTemplateAreas = `
       "checkin"
       "checkout"
@@ -162,20 +158,37 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
       "button"
     `;
     gridTemplateColumns = "1fr";
-    gap = 0.75; pad = 0.9;
+    gap = 0.9;
+    pad = 0.9;
   }
 
-  // portal poppers/menus to body (avoid clipping)
   const containerEl = useMemo(
     () => (typeof document !== "undefined" ? document.body : undefined),
     []
   );
 
   const commonDateFieldSx = {
-    "& .MuiInputBase-root": { minHeight: baseFieldHeight, borderRadius: 1.25 },
-    "& .MuiOutlinedInput-input": { fontSize: controlFontSize, cursor: "pointer", py: 1, px: 1.5 },
+    "& .MuiInputBase-root": { minHeight: baseFieldHeight as any, borderRadius: 1.25 },
+    "& .MuiOutlinedInput-input": {
+      fontSize: controlFontSize,
+      cursor: "pointer",
+      py: 1,
+      px: 1.5,
+    },
     "& .MuiInputLabel-root": { fontSize: controlFontSize },
   } as const;
+
+  // Guaranteed-boolean error flags (never null/Date mixed)
+  const checkInError = Boolean(attempted && !checkIn);
+  const checkOutError = Boolean(
+    attempted &&
+      (!checkOut ||
+        (checkIn !== null &&
+          checkOut !== null &&
+          checkOut <= checkIn))
+  );
+  const guestsError = Boolean(attempted && guests === -1);
+  const childrenError = Boolean(attempted && children === -1);
 
   return (
     <Box sx={{ position: "relative" }}>
@@ -191,17 +204,11 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
           alignItems: "center",
           p: pad,
           width: "100%",
-          maxWidth: { xs: 560, sm: 1000, md: 1200 },
+          maxWidth: { xs: 320, sm: 560, md: 800, lg: 1000, xl: 1200 },
           mx: "auto",
           bgcolor: "rgba(0,0,0,0.25)",
           borderRadius: { xs: 1.25, sm: 1.5, md: 1.75 },
           boxShadow: theme.shadows[4],
-          minWidth: 0,
-
-          // tiny tweaks for ultra-small
-          "@media (max-width:360px)": {
-            "& .MuiFormControl-root": { margin: "4px 0" },
-          },
         }}
       >
         <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -216,7 +223,10 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
               onOpen={() => setOpenIn(true)}
               onClose={() => setOpenIn(false)}
               enableAccessibleFieldDOMStructure={false}
-              slots={{ textField: WhiteBorderTextField, openPickerIcon: () => <></> }}
+              slots={{
+                textField: WhiteBorderTextField,
+                openPickerIcon: () => <></>,
+              }}
               slotProps={{
                 textField: {
                   fullWidth: true,
@@ -234,14 +244,13 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
                         <EventIcon sx={{ fontSize: iconSize }} />
                       </InputAdornment>
                     ),
-                    endAdornment: null,
+                    endAdornment: undefined,
                   },
-                  error: attempted && !checkIn,
-                  helperText: attempted && !checkIn ? "Required" : undefined,
+                  error: checkInError,
+                  helperText: checkInError ? "Required" : undefined,
                   sx: { ...commonDateFieldSx, minWidth: 0 },
                 },
-                popper: { disablePortal: false, container: containerEl as any },
-                openPickerButton: { sx: { display: "none" } },
+                popper: { container: containerEl as any },
               }}
             />
           </Box>
@@ -257,7 +266,10 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
               onOpen={() => setOpenOut(true)}
               onClose={() => setOpenOut(false)}
               enableAccessibleFieldDOMStructure={false}
-              slots={{ textField: WhiteBorderTextField, openPickerIcon: () => <></> }}
+              slots={{
+                textField: WhiteBorderTextField,
+                openPickerIcon: () => <></>,
+              }}
               slotProps={{
                 textField: {
                   fullWidth: true,
@@ -275,17 +287,13 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
                         <EventIcon sx={{ fontSize: iconSize }} />
                       </InputAdornment>
                     ),
-                    endAdornment: null,
+                    endAdornment: undefined,
                   },
-                  error: attempted && (!checkOut || (checkIn && checkOut <= checkIn)),
-                  helperText:
-                    attempted && (!checkOut || (checkIn && checkOut <= checkIn))
-                      ? "Must be after check-in"
-                      : undefined,
+                  error: checkOutError,
+                  helperText: checkOutError ? "Must be after check-in" : undefined,
                   sx: { ...commonDateFieldSx, minWidth: 0 },
                 },
-                popper: { disablePortal: false, container: containerEl as any },
-                openPickerButton: { sx: { display: "none" } },
+                popper: { container: containerEl as any },
               }}
             />
           </Box>
@@ -297,28 +305,30 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
             size={isSmUp ? "medium" : "small"}
             variant="outlined"
             fullWidth
-            error={attempted && guests === ""}
+            error={guestsError}
             sx={{
               "& .MuiInputLabel-root": { color: "#fff", fontSize: controlFontSize },
               "& .MuiInputLabel-root.Mui-focused": { color: "#fff" },
               "& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
-              "& .MuiInputBase-root": { minHeight: baseFieldHeight, borderRadius: 1.25 },
+              "& .MuiInputBase-root": { minHeight: baseFieldHeight as any, borderRadius: 1.25 },
               minWidth: 0,
             }}
           >
             <WhiteInputLabel id="guests-label">Guests</WhiteInputLabel>
-            <Select
+            <Select<number>
               labelId="guests-label"
               label="Guests"
               value={guests}
               displayEmpty
-              onChange={(e) => setGuests(e.target.value === "" ? "" : Number(e.target.value))}
+              onChange={(e) => setGuests(e.target.value as number)}
               renderValue={(selected) =>
-                selected === "" ? <span style={{ color: "#fff", opacity: 0.7 }} /> :
-                `${selected} ${selected === 1 ? "Guest" : "Guests"}`
+                selected === -1 ? (
+                  <span style={{ color: "#fff", opacity: 0.7 }}>Select guests</span>
+                ) : (
+                  `${selected} ${selected === 1 ? "Guest" : "Guests"}`
+                )
               }
               MenuProps={{
-                disablePortal: false,
                 container: containerEl,
                 PaperProps: { sx: { maxHeight: 300 } },
                 anchorOrigin: { vertical: "bottom", horizontal: "left" },
@@ -326,16 +336,16 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
               }}
               sx={{
                 fontSize: controlFontSize,
-                minHeight: baseFieldHeight,
+                minHeight: baseFieldHeight as any,
                 color: "#fff",
                 "& .MuiSelect-icon": { color: "#fff" },
               }}
             >
-              <MenuItem value="" disabled sx={{ color: "#777" }}>
+              <MenuItem value={-1} disabled>
                 Select guests
               </MenuItem>
-              {[1, 2, 3, 4].map((n) => (
-                <MenuItem key={n} value={n} sx={{ fontSize: controlFontSize }}>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <MenuItem key={n} value={n}>
                   {n} {n === 1 ? "Guest" : "Guests"}
                 </MenuItem>
               ))}
@@ -349,28 +359,30 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
             size={isSmUp ? "medium" : "small"}
             variant="outlined"
             fullWidth
-            error={attempted && children === ""}
+            error={childrenError}
             sx={{
               "& .MuiInputLabel-root": { color: "#fff", fontSize: controlFontSize },
               "& .MuiInputLabel-root.Mui-focused": { color: "#fff" },
               "& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
-              "& .MuiInputBase-root": { minHeight: baseFieldHeight, borderRadius: 1.25 },
+              "& .MuiInputBase-root": { minHeight: baseFieldHeight as any, borderRadius: 1.25 },
               minWidth: 0,
             }}
           >
             <WhiteInputLabel id="children-label">Children</WhiteInputLabel>
-            <Select
+            <Select<number>
               labelId="children-label"
               label="Children"
               value={children}
               displayEmpty
-              onChange={(e) => setChildren(e.target.value === "" ? "" : Number(e.target.value))}
+              onChange={(e) => setChildren(e.target.value as number)}
               renderValue={(selected) =>
-                selected === "" ? <span style={{ color: "#fff", opacity: 0.7 }} /> :
-                `${selected} ${selected === 1 ? "Child" : "Children"}`
+                selected === -1 ? (
+                  <span style={{ color: "#fff", opacity: 0.7 }}>Select children</span>
+                ) : (
+                  `${selected} ${selected === 1 ? "Child" : "Children"}`
+                )
               }
               MenuProps={{
-                disablePortal: false,
                 container: containerEl,
                 PaperProps: { sx: { maxHeight: 300 } },
                 anchorOrigin: { vertical: "bottom", horizontal: "left" },
@@ -378,16 +390,16 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
               }}
               sx={{
                 fontSize: controlFontSize,
-                minHeight: baseFieldHeight,
+                minHeight: baseFieldHeight as any,
                 color: "#fff",
                 "& .MuiSelect-icon": { color: "#fff" },
               }}
             >
-              <MenuItem value="" disabled sx={{ color: "#777" }}>
+              <MenuItem value={-1} disabled>
                 Select children
               </MenuItem>
               {[0, 1, 2, 3, 4].map((n) => (
-                <MenuItem key={n} value={n} sx={{ fontSize: controlFontSize }}>
+                <MenuItem key={n} value={n}>
                   {n} {n === 1 ? "Child" : "Children"}
                 </MenuItem>
               ))}
@@ -412,7 +424,7 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
               whiteSpace: "nowrap",
               px: { xs: 2.25, sm: 3, md: 0 },
               py: { xs: 1.1, sm: 1.25, md: 2 },
-              fontSize: { xs: "1rem", sm: "1.05rem", md: "1.15rem" },
+              fontSize: "clamp(1rem, 2.2vw, 1.15rem)",
               bgcolor: "#5f02ab",
               borderRadius: 1.25,
               "&:hover": { bgcolor: "#320953" },

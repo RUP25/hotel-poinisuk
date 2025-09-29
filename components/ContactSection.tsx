@@ -1,3 +1,4 @@
+// components/ContactSection.tsx
 import React from "react";
 import {
   Box,
@@ -6,16 +7,121 @@ import {
   TextField,
   Button,
   Paper,
+  Snackbar,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 
+const CONTACT_ENDPOINT =
+  "https://udvt0prn89.execute-api.ap-south-1.amazonaws.com/contact";
+
 const ContactSection: React.FC = () => {
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = React.useState(false);
+  const [snack, setSnack] = React.useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({ open: false, message: "", severity: "success" });
+
+  const handleCloseSnack = () => setSnack((s) => ({ ...s, open: false }));
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert("Thank you! We’ve received your message.");
+    if (submitting) return;
+
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+
+    // Basic client-side validation (email + message non-empty are already required)
+    const name = (fd.get("name") || "").toString().trim();
+    const email = (fd.get("email") || "").toString().trim();
+    const phone = (fd.get("phone") || "").toString().trim();
+    const subject = (fd.get("subject") || "").toString().trim();
+    const message = (fd.get("message") || "").toString().trim();
+
+    if (!name || !email || !message) {
+      setSnack({
+        open: true,
+        severity: "error",
+        message: "Please fill in your name, email, and message.",
+      });
+      return;
+    }
+
+    const payload = {
+      name,
+      email,
+      phone,
+      subject,
+      message,
+      source: "hotelpoinisuk.com",
+      submittedAt: new Date().toISOString(),
+      userAgent:
+        typeof navigator !== "undefined" ? navigator.userAgent : "server",
+    };
+
+    try {
+      setSubmitting(true);
+
+      const res = await fetch(CONTACT_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // If your API Gateway/Lambda expects a different shape, adjust here
+        body: JSON.stringify(payload),
+      });
+
+      // Some Lambda integrations wrap response in { statusCode, body }
+      let ok = res.ok;
+      let msg = "Thank you! We’ve received your message.";
+
+      try {
+        const data = await res.json().catch(() => null);
+        if (data && typeof data === "object") {
+          // Try to infer success from common Lambda patterns
+          if ("statusCode" in data && typeof data.statusCode === "number") {
+            ok = data.statusCode >= 200 && data.statusCode < 300;
+            if (data.body) {
+              try {
+                const b = JSON.parse(data.body);
+                if (b?.message) msg = b.message;
+              } catch {
+                // body may not be JSON; ignore
+              }
+            }
+          } else if (data?.message) {
+            msg = data.message;
+          }
+        }
+      } catch {
+        // ignore parse issues, fall back to default msg
+      }
+
+      if (!ok) {
+        throw new Error("Request failed");
+      }
+
+      setSnack({ open: true, message: msg, severity: "success" });
+      form.reset();
+    } catch (err) {
+      setSnack({
+        open: true,
+        severity: "error",
+        message:
+          "Sorry, something went wrong while sending your message. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <Box component="section" id="contact-section" sx={{ scrollMarginTop: { xs: 72, sm: 88, md: 120 } }}>
+    <Box
+      component="section"
+      id="contact-section"
+      sx={{ scrollMarginTop: { xs: 72, sm: 88, md: 120 } }}
+    >
       {/* ── Hero / Form Overlay (content-driven height) ── */}
       <Box sx={{ position: "relative" }}>
         {/* Background image */}
@@ -24,7 +130,7 @@ const ContactSection: React.FC = () => {
           sx={{
             position: "absolute",
             inset: 0,
-            backgroundImage: `url(/images/contact.webp)`,
+            backgroundImage: `url('/images/contact.webp')`, // fixed quotes
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -39,7 +145,6 @@ const ContactSection: React.FC = () => {
             backgroundColor: "rgba(24,23,23,0.5)",
           }}
         />
-
         {/* Content (drives height) */}
         <Box
           sx={{
@@ -47,15 +152,15 @@ const ContactSection: React.FC = () => {
             zIndex: 1,
             color: "#fff",
             px: { xs: 1.5, sm: 2.5, md: 3 },
-            py: { xs: 4, sm: 6, md: 8 },         // vertical breathing room
-            minHeight: { xs: 520, sm: 560, md: "62vh" }, // never too short
+            py: { xs: 4, sm: 6, md: 8 },
+            minHeight: { xs: 520, sm: 560, md: "62vh" },
             display: "flex",
             alignItems: "center",
             textAlign: "center",
             fontFamily: "Georgia, serif",
           }}
         >
-          <Container maxWidth="lg" sx={{ width: "100%" }}> 
+          <Container maxWidth="lg" sx={{ width: "100%" }}>
             <Typography
               variant="h3"
               component="h2"
@@ -112,12 +217,9 @@ const ContactSection: React.FC = () => {
                 gap={{ xs: 1.25, sm: 1.75, md: 2 }}
                 gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr" }}
                 sx={{
-                  "@media (max-width:600px)": {
-                    gridTemplateColumns: "1fr !important",
-                  },
+                  "@media (max-width:600px)": { gridTemplateColumns: "1fr !important" },
                 }}
               >
-                {/* Use outlined + filled bg on mobile for readability */}
                 <TextField
                   fullWidth
                   label="Your Name"
@@ -126,13 +228,9 @@ const ContactSection: React.FC = () => {
                   size="small"
                   required
                   sx={{
-                    "& .MuiInputBase-root": {
-                      bgcolor: { xs: "transparent", sm: "transparent" },
-                      color: { xs: "#fff", sm: "#fff" },
-                    },
-                    "& .MuiInputLabel-root": {
-                      color: { xs: "#fff", sm: "#fff" },
-                    },
+                    "& .MuiInputBase-root": { color: "#fff" },
+                    "& .MuiInputLabel-root": { color: "#fff" },
+                    "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,0.5)" },
                   }}
                 />
                 <TextField
@@ -144,13 +242,9 @@ const ContactSection: React.FC = () => {
                   size="small"
                   required
                   sx={{
-                    "& .MuiInputBase-root": {
-                      bgcolor: { xs: "transparent", sm: "rgba(255,255,255,0.08)" },
-                      color: { xs: "#111", sm: "#fff" },
-                    },
-                    "& .MuiInputLabel-root": {
-                      color: { xs: "#fff", sm: "#fff" },
-                    },
+                    "& .MuiInputBase-root": { color: "#fff" },
+                    "& .MuiInputLabel-root": { color: "#fff" },
+                    "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,0.5)" },
                   }}
                 />
                 <TextField
@@ -160,13 +254,9 @@ const ContactSection: React.FC = () => {
                   variant="outlined"
                   size="small"
                   sx={{
-                    "& .MuiInputBase-root": {
-                      bgcolor: { xs: "transparent", sm: "rgba(255,255,255,0.08)" },
-                      color: { xs: "#fff", sm: "#fff" },
-                    },
-                    "& .MuiInputLabel-root": {
-                      color: { xs: "#fff", sm: "#fff" },
-                    },
+                    "& .MuiInputBase-root": { color: "#fff" },
+                    "& .MuiInputLabel-root": { color: "#fff" },
+                    "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,0.5)" },
                   }}
                 />
                 <TextField
@@ -176,16 +266,11 @@ const ContactSection: React.FC = () => {
                   variant="outlined"
                   size="small"
                   sx={{
-                    "& .MuiInputBase-root": {
-                      bgcolor: { xs: "transparent", sm: "rgba(255,255,255,0.08)" },
-                      color: { xs: "#111", sm: "#fff" },
-                    },
-                    "& .MuiInputLabel-root": {
-                      color: { xs: "#fff", sm: "#fff" },
-                    },
+                    "& .MuiInputBase-root": { color: "#fff" },
+                    "& .MuiInputLabel-root": { color: "#fff" },
+                    "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,0.5)" },
                   }}
                 />
-
                 {/* Message spans full width */}
                 <Box gridColumn="1 / -1">
                   <TextField
@@ -198,12 +283,10 @@ const ContactSection: React.FC = () => {
                     rows={4}
                     required
                     sx={{
-                      "& .MuiInputBase-root": {
-                        bgcolor: { xs: "transparent", sm: "rgba(255,255,255,0.08)" },
-                        color: { xs: "#111", sm: "#fff" },
-                      },
-                      "& .MuiInputLabel-root": {
-                        color: { xs: "#fff", sm: "#fff" },
+                      "& .MuiInputBase-root": { color: "#fff" },
+                      "& .MuiInputLabel-root": { color: "#fff" },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "rgba(255,255,255,0.5)",
                       },
                     }}
                   />
@@ -214,6 +297,7 @@ const ContactSection: React.FC = () => {
                   <Button
                     type="submit"
                     variant="contained"
+                    disabled={submitting}
                     sx={{
                       bgcolor: "#5f02ab",
                       "&:hover": { bgcolor: "#320953" },
@@ -222,8 +306,11 @@ const ContactSection: React.FC = () => {
                       width: { xs: "100%", sm: "auto" },
                       borderRadius: 1.2,
                     }}
+                    startIcon={
+                      submitting ? <CircularProgress size={18} sx={{ color: "inherit" }} /> : null
+                    }
                   >
-                    Submit
+                    {submitting ? "Sending..." : "Submit"}
                   </Button>
                 </Box>
               </Box>
@@ -231,6 +318,22 @@ const ContactSection: React.FC = () => {
           </Container>
         </Box>
       </Box>
+
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={5000}
+        onClose={handleCloseSnack}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnack}
+          severity={snack.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snack.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

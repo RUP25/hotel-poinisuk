@@ -7,11 +7,11 @@ import { Box, Link as MuiLink, Divider } from "@mui/material";
 
 const navItems = [
   { label: "Rooms", href: "/rooms" },
-  { label: "Dine", href: "/dine" },
-  { label: "Bar", href: "/klong" },
+  { label: "Dopwai", href: "/dine" },
+  { label: "Klong", href: "/klong" },
   { label: "Banquet Hall", href: "#banquet" },
   { label: "Guest Services", href: "#guest-services" },
-  { label: "Contact", href: "#contact-section" },
+  { label: "Contact Us", href: "#contact-section" },
 ];
 
 const NavBar: React.FC = () => {

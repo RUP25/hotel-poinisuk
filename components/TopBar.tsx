@@ -1,7 +1,9 @@
 // components/TopBar.tsx
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import {
   Box,
   Button,
@@ -13,18 +15,10 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import { motion, AnimatePresence } from "framer-motion";
 import HamburgerMenu from "./HamburgerMenu";
 
-const TOP_BAR_HEIGHT_MD = 82;
-
 const TopBar: React.FC = () => {
   const theme = useTheme();
-
-  // Breakpoints (client-only to avoid SSR mismatch)
-  const isXs = useMediaQuery(theme.breakpoints.only("xs"), { noSsr: true });
-  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"), { noSsr: true });
-  const isMdUp = useMediaQuery(theme.breakpoints.up("md"), { noSsr: true });
-  const isLgUp = useMediaQuery(theme.breakpoints.up("lg"), { noSsr: true });
   const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true });
-  const isLandscape = useMediaQuery("(orientation: landscape)", { noSsr: true });
+  const isXs = useMediaQuery(theme.breakpoints.only("xs"), { noSsr: true });
 
   const [atTop, setAtTop] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -35,42 +29,26 @@ const TopBar: React.FC = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Bar height per breakpoint/orientation
-  const barHeight = useMemo(() => {
-    if (isXs && isLandscape) return 65;
-    if (isXs) return 70;
-    if (!isMdUp) return 80;   // sm
-    if (!isLgUp) return 90;  // md (laptop)
-    return 110;               // lg+
-  }, [isXs, isMdUp, isLgUp, isLandscape]);
-
-  // Motion variants
+  // Motion variants (don’t change layout between SSR/CSR)
   const barVariants = useMemo(
     () => ({
-      hidden: reduceMotion ? { opacity: 0 } : { y: -TOP_BAR_HEIGHT_MD, opacity: 0 },
+      hidden: reduceMotion ? { opacity: 0 } : { y: -20, opacity: 0 },
       visible: reduceMotion
         ? { opacity: 1, transition: { duration: 0.001 } }
-        : {
-            y: 0,
-            opacity: 1,
-            transition: { when: "beforeChildren", staggerChildren: 0.08, duration: 0.3 },
-          },
+        : { y: 0, opacity: 1, transition: { when: "beforeChildren", staggerChildren: 0.08, duration: 0.3 } },
     }),
     [reduceMotion]
   );
-
   const itemVariants = useMemo(
     () => ({
       hidden: reduceMotion ? { opacity: 0 } : { y: -10, opacity: 0 },
-      visible: reduceMotion
-        ? { opacity: 1, transition: { duration: 0.001 } }
-        : { y: 0, opacity: 1, transition: { duration: 0.25 } },
+      visible: reduceMotion ? { opacity: 1 } : { y: 0, opacity: 1, transition: { duration: 0.25 } },
     }),
     [reduceMotion]
   );
 
   return (
-    <AnimatePresence>
+    <AnimatePresence initial={false}>
       {atTop && (
         <Box
           component={motion.div}
@@ -87,7 +65,8 @@ const TopBar: React.FC = () => {
             display: "flex",
             alignItems: "center",
 
-            height: barHeight,
+            // ✅ Pure CSS responsive heights — identical SSR/CSR
+            height: { xs: 70, sm: 80, md: 90, lg: 110 },
             px: { xs: 2, sm: 3, md: 4, lg: 5 },
             py: { xs: 0.5, md: 0.5 },
 
@@ -110,7 +89,7 @@ const TopBar: React.FC = () => {
           }}
         >
           <Box className="topbar-inner">
-            {/* Left: Hamburger (col 1) */}
+            {/* Left: Hamburger */}
             <Box
               component={motion.div}
               variants={itemVariants}
@@ -119,7 +98,7 @@ const TopBar: React.FC = () => {
               <HamburgerMenu open={drawerOpen} setOpen={setDrawerOpen} />
             </Box>
 
-            {/* Center: Logo (col 2, perfectly centered) */}
+            {/* Center: Logo (click → Home) */}
             <Box
               sx={{
                 gridColumn: 2,
@@ -134,32 +113,53 @@ const TopBar: React.FC = () => {
                 component={motion.div}
                 variants={itemVariants}
                 sx={{
-                  // explicit heights per breakpoint — tweak these to resize
+                  // responsive box that controls logo size; CSS-only
                   height: { xs: 120, sm: 140, md: 160, lg: 180, xl: 200 },
-                  maxWidth: { xs: "36vw", sm: "36vw", md: "30vw", lg: "30vw", xl: "36vw" },
+                  maxWidth: { xs: "46vw", sm: "40vw", md: "32vw", lg: "30vw", xl: "30vw" },
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
                 <Box
-                  component={motion.img}
-                  src="/images/logo1.png"
-                  alt="Hotel Poinisuk"
-                  variants={itemVariants}
-                  draggable={false}
+                  component={Link}
+                  href="/"
+                  aria-label="Go to Home"
                   sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
                     height: "100%",
-                    width: "auto",
-                    objectFit: "contain",
-                    display: "block",
-                    mx: "auto",
-                    WebkitUserDrag: "none",
-                    userSelect: "none",
-                    pointerEvents: "none",
+                    cursor: "pointer",
+                    pointerEvents: "auto",
+                    "&:hover": { opacity: 0.92 },
                   }}
-                />
+                >
+                  <Image
+                    src="/images/logo1.png"
+                    alt="Hotel Poinisuk"
+                    width={1200}
+                    height={450}
+                    priority
+                    sizes="(max-width:600px) 46vw,
+                           (max-width:900px) 40vw,
+                           (max-width:1200px) 32vw,
+                           (max-width:1536px) 30vw,
+                           30vw"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      userSelect: "none",
+                      display: "block",
+                    }}
+                  />
+                </Box>
               </Box>
             </Box>
 
-            {/* Right: Book Now + Phone (col 3) */}
+            {/* Right: Book Now + Phone */}
             <Box
               component={motion.div}
               variants={itemVariants}
@@ -175,7 +175,7 @@ const TopBar: React.FC = () => {
             >
               <Button
                 variant="outlined"
-                href="#availability"
+                href="https://www.swiftbook.io/inst/#/home?propertyId=223NTUo30r6ZPJm6O5Mzg=&JDRN=Y&RoomID=226166,226165,226164,226163,226162&noofrooms=1&adult0=1&child0=0&ap=1&gsId=223NTUo30r6ZPJm6O5Mzg="
                 aria-label="Jump to availability form"
                 sx={{
                   color: "white",
@@ -192,7 +192,6 @@ const TopBar: React.FC = () => {
                   "&:hover": { borderColor: "white", bgcolor: "rgba(255,255,255,0.1)" },
                 }}
               >
-                {/* hydration-safe label */}
                 <>
                   Book
                   <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
@@ -227,7 +226,7 @@ const TopBar: React.FC = () => {
                     whiteSpace: "nowrap",
                   }}
                 >
-                  (209) 379-2606
+                  (0364) 7100030
                 </Typography>
               </Box>
             </Box>
