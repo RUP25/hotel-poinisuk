@@ -14,7 +14,7 @@ import "slick-carousel/slick/slick-theme.css";
 const TOP_CAROUSEL = [
   "/images/banq6.jpeg",
   "/images/banq2.jpg",
-  "/images/banq3.avif ",
+  "/images/banq3.avif",
   "/images/banquet.avif",
   "/images/banq5.jpeg",
   "/images/banq1.jpg",
@@ -54,6 +54,104 @@ export default function BanquetPage() {
           content="Unforgettable Weddings & Events at Hotel Poinisuk. Elegant banquet hall, curated menus from Dopwai, live entertainment, AV/DJ/karaoke. Capacity up to 200 guests."
         />
       </Head>
+      
+      {/* SEO is handled by _app.tsx with seo prop */}
+
+      {/* ===================== SECTION HEADING ===================== */}
+      <Container
+        maxWidth="lg"
+        sx={{
+          pt: { xs: 4, md: 6 },
+          pb: { xs: 1.5, md: 2.5 },
+          textAlign: "center",
+          "@keyframes bnqRise": {
+            from: { opacity: 0, transform: "translateY(14px)" },
+            to: { opacity: 1, transform: "translateY(0)" },
+          },
+          "@keyframes bnqRule": {
+            from: { transform: "scaleX(0)" },
+            to: { transform: "scaleX(1)" },
+          },
+          "@keyframes bnqDiamond": {
+            from: { opacity: 0, transform: "rotate(45deg) scale(0.4)" },
+            to: { opacity: 1, transform: "rotate(45deg) scale(1)" },
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: "inline-flex",
+            flexDirection: "column",
+            alignItems: "center",
+            opacity: 0,
+            animation: "bnqRise 800ms ease-out 100ms forwards",
+          }}
+        >
+          {/* Eyebrow ornament: line • diamond • line */}
+          <Box
+            aria-hidden
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1.25,
+              mb: { xs: 1.25, md: 1.75 },
+            }}
+          >
+            <Box
+              sx={{
+                width: { xs: 48, sm: 64, md: 84 },
+                height: "1px",
+                background:
+                  "linear-gradient(to right, rgba(90,66,53,0) 0%, rgba(90,66,53,0.55) 50%, rgba(90,66,53,0) 100%)",
+                transformOrigin: "right center",
+                animation: "bnqRule 700ms ease-out 350ms both",
+              }}
+            />
+            <Box
+              sx={{
+                width: 7,
+                height: 7,
+                bgcolor: "#8a6a4f",
+                transform: "rotate(45deg)",
+                boxShadow: "0 0 0 1px rgba(90,66,53,0.18)",
+                animation: "bnqDiamond 600ms ease-out 600ms both",
+              }}
+            />
+            <Box
+              sx={{
+                width: { xs: 48, sm: 64, md: 84 },
+                height: "1px",
+                background:
+                  "linear-gradient(to right, rgba(90,66,53,0) 0%, rgba(90,66,53,0.55) 50%, rgba(90,66,53,0) 100%)",
+                transformOrigin: "left center",
+                animation: "bnqRule 700ms ease-out 350ms both",
+              }}
+            />
+          </Box>
+
+          {/* Main heading */}
+          <Typography
+            component="h2"
+            sx={{
+              fontFamily: `var(--font-cinzel), var(--font-cormorant), 'Playfair Display', 'Georgia', serif`,
+              fontWeight: 600,
+              color: "#3d2a1f",
+              textTransform: "uppercase",
+              letterSpacing: { xs: ".18em", md: ".28em" },
+              fontSize: {
+                xs: "clamp(1.4rem, 5.6vw, 1.85rem)",
+                md: "2.15rem",
+                lg: "2.35rem",
+              },
+              lineHeight: 1.15,
+              textShadow: "0 1px 0 rgba(255,255,255,0.5)",
+            }}
+          >
+            Banquet Hall
+          </Typography>
+        </Box>
+      </Container>
 
       {/* ===================== TOP ROW CAROUSEL ===================== */}
       <Container maxWidth="xl" sx={{ py: { xs: 3, md: 4 } }}>
@@ -193,7 +291,7 @@ export default function BanquetPage() {
                     fontWeight: 800,
                     letterSpacing: ".06em",
                     color: "#5a4235",
-                    fontFamily: `'Montserrat','Helvetica Neue',Arial,sans-serif`,
+                    fontFamily: `var(--font-montserrat), 'Helvetica Neue', Arial, sans-serif`,
                     fontSize: { xs: 26, sm: 34, md: 40 },
                     lineHeight: 1.15,
                   }}
@@ -218,3 +316,13 @@ export default function BanquetPage() {
     </>
   );
 }
+
+// Add SEO metadata
+(BanquetPage as any).seo = {
+  title: "Banquet Hall",
+  description:
+    "Unforgettable weddings & events at Hotel Poinisuk. Elegant banquet hall with capacity up to 200 guests, curated multi-cuisine menus from Dopwai, live entertainment, AV/DJ/karaoke, and decor support.",
+  keywords: "banquet hall Shillong, wedding venue Shillong, event hall Shillong, hotel banquet Shillong",
+  ogImage: "/images/og/banquet.jpg",
+};
+

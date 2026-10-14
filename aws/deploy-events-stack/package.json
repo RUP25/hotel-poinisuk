@@ -1,0 +1,22 @@
+{
+  "name": "hotel-poinisuk-deploy-events-stack",
+  "version": "1.0.0",
+  "private": true,
+  "description": "One-shot script to create/update AWS resources for the Hotel Poinisuk events (karaoke) API.",
+  "scripts": {
+    "deploy": "node deploy.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@aws-sdk/client-apigatewayv2": "^3.620.0",
+    "@aws-sdk/client-dynamodb": "^3.620.0",
+    "@aws-sdk/client-iam": "^3.620.0",
+    "@aws-sdk/client-lambda": "^3.620.0",
+    "@aws-sdk/client-s3": "^3.620.0",
+    "@aws-sdk/client-sts": "^3.620.0",
+    "archiver": "^7.0.1",
+    "bcryptjs": "^2.4.3"
+  }
+}

@@ -1,0 +1,47 @@
+# =============================================================================
+# Hotel Poinisuk — robots.txt
+# Reviewed against the playbooks of top luxury chains (Taj / Oberoi / ITC).
+# =============================================================================
+
+User-agent: *
+Allow: /
+
+# Block private / framework paths
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /404
+Disallow: /500
+
+# Explicitly allow the dynamic room detail pages and major sections so any
+# crawler reading `Disallow` rules above won't accidentally exclude them.
+Allow: /
+Allow: /rooms
+Allow: /rooms/
+Allow: /dine
+Allow: /klong
+Allow: /banquet
+Allow: /about
+Allow: /booking
+Allow: /terms
+
+# Image crawlers — let Googlebot-Image & Bingbot index hero / room / dining
+# imagery so the property appears in image search and the Google Hotels card.
+User-agent: Googlebot-Image
+Allow: /images/
+
+User-agent: Bingbot
+Allow: /
+
+# Block aggressive scrapers that bring no SEO value but cost bandwidth.
+User-agent: AhrefsBot
+Disallow: /
+User-agent: SemrushBot
+Disallow: /
+User-agent: MJ12bot
+Disallow: /
+User-agent: DotBot
+Disallow: /
+
+# Sitemap (next-sitemap generates this on every build via `postbuild`).
+Sitemap: https://www.hotelpoinisuk.com/sitemap.xml

@@ -11,9 +11,12 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
+import { submitContactForm, validateContactInput } from "@/lib/contact";
 
-const CONTACT_ENDPOINT =
-  "https://udvt0prn89.execute-api.ap-south-1.amazonaws.com/contact";
+// Hotel Poinisuk brand font stacks
+const cormorant = "var(--font-cormorant), 'Playfair Display', 'Georgia', serif";
+const cinzel = "var(--font-cinzel), var(--font-cormorant), 'Playfair Display', 'Georgia', serif";
+const montserrat = "var(--font-montserrat), 'Helvetica Neue', Arial, sans-serif";
 
 const ContactSection: React.FC = () => {
   const [submitting, setSubmitting] = React.useState(false);
@@ -31,89 +34,31 @@ const ContactSection: React.FC = () => {
 
     const form = e.currentTarget;
     const fd = new FormData(form);
+    const input = {
+      name: (fd.get("name") || "").toString().trim(),
+      email: (fd.get("email") || "").toString().trim(),
+      phone: (fd.get("phone") || "").toString().trim(),
+      subject: (fd.get("subject") || "").toString().trim(),
+      message: (fd.get("message") || "").toString().trim(),
+      source: "hotelpoinisuk.com / contact-section",
+    };
 
-    // Basic client-side validation (email + message non-empty are already required)
-    const name = (fd.get("name") || "").toString().trim();
-    const email = (fd.get("email") || "").toString().trim();
-    const phone = (fd.get("phone") || "").toString().trim();
-    const subject = (fd.get("subject") || "").toString().trim();
-    const message = (fd.get("message") || "").toString().trim();
-
-    if (!name || !email || !message) {
-      setSnack({
-        open: true,
-        severity: "error",
-        message: "Please fill in your name, email, and message.",
-      });
+    const validationError = validateContactInput(input);
+    if (validationError) {
+      setSnack({ open: true, severity: "error", message: validationError });
       return;
     }
 
-    const payload = {
-      name,
-      email,
-      phone,
-      subject,
-      message,
-      source: "hotelpoinisuk.com",
-      submittedAt: new Date().toISOString(),
-      userAgent:
-        typeof navigator !== "undefined" ? navigator.userAgent : "server",
-    };
+    setSubmitting(true);
+    const result = await submitContactForm(input);
+    setSubmitting(false);
 
-    try {
-      setSubmitting(true);
-
-      const res = await fetch(CONTACT_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // If your API Gateway/Lambda expects a different shape, adjust here
-        body: JSON.stringify(payload),
-      });
-
-      // Some Lambda integrations wrap response in { statusCode, body }
-      let ok = res.ok;
-      let msg = "Thank you! We’ve received your message.";
-
-      try {
-        const data = await res.json().catch(() => null);
-        if (data && typeof data === "object") {
-          // Try to infer success from common Lambda patterns
-          if ("statusCode" in data && typeof data.statusCode === "number") {
-            ok = data.statusCode >= 200 && data.statusCode < 300;
-            if (data.body) {
-              try {
-                const b = JSON.parse(data.body);
-                if (b?.message) msg = b.message;
-              } catch {
-                // body may not be JSON; ignore
-              }
-            }
-          } else if (data?.message) {
-            msg = data.message;
-          }
-        }
-      } catch {
-        // ignore parse issues, fall back to default msg
-      }
-
-      if (!ok) {
-        throw new Error("Request failed");
-      }
-
-      setSnack({ open: true, message: msg, severity: "success" });
-      form.reset();
-    } catch (err) {
-      setSnack({
-        open: true,
-        severity: "error",
-        message:
-          "Sorry, something went wrong while sending your message. Please try again.",
-      });
-    } finally {
-      setSubmitting(false);
-    }
+    setSnack({
+      open: true,
+      severity: result.ok ? "success" : "error",
+      message: result.message,
+    });
+    if (result.ok) form.reset();
   };
 
   return (
@@ -157,7 +102,7 @@ const ContactSection: React.FC = () => {
             display: "flex",
             alignItems: "center",
             textAlign: "center",
-            fontFamily: "Georgia, serif",
+            fontFamily: cormorant,
           }}
         >
           <Container maxWidth="lg" sx={{ width: "100%" }}>
@@ -166,6 +111,7 @@ const ContactSection: React.FC = () => {
               component="h2"
               gutterBottom
               sx={{
+                fontFamily: cormorant,
                 fontWeight: 700,
                 lineHeight: 1.15,
                 fontSize: {
@@ -181,6 +127,8 @@ const ContactSection: React.FC = () => {
             <Typography
               variant="body1"
               sx={{
+                fontFamily: cormorant,
+                fontWeight: 500,
                 mx: "auto",
                 maxWidth: { xs: 560, md: 760 },
                 mb: { xs: 2.25, sm: 3 },
@@ -228,8 +176,8 @@ const ContactSection: React.FC = () => {
                   size="small"
                   required
                   sx={{
-                    "& .MuiInputBase-root": { color: "#fff" },
-                    "& .MuiInputLabel-root": { color: "#fff" },
+                    "& .MuiInputBase-root": { color: "#fff", fontFamily: montserrat },
+                    "& .MuiInputLabel-root": { color: "#fff", fontFamily: montserrat },
                     "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,0.5)" },
                   }}
                 />
@@ -242,8 +190,8 @@ const ContactSection: React.FC = () => {
                   size="small"
                   required
                   sx={{
-                    "& .MuiInputBase-root": { color: "#fff" },
-                    "& .MuiInputLabel-root": { color: "#fff" },
+                    "& .MuiInputBase-root": { color: "#fff", fontFamily: montserrat },
+                    "& .MuiInputLabel-root": { color: "#fff", fontFamily: montserrat },
                     "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,0.5)" },
                   }}
                 />
@@ -254,8 +202,8 @@ const ContactSection: React.FC = () => {
                   variant="outlined"
                   size="small"
                   sx={{
-                    "& .MuiInputBase-root": { color: "#fff" },
-                    "& .MuiInputLabel-root": { color: "#fff" },
+                    "& .MuiInputBase-root": { color: "#fff", fontFamily: montserrat },
+                    "& .MuiInputLabel-root": { color: "#fff", fontFamily: montserrat },
                     "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,0.5)" },
                   }}
                 />
@@ -266,8 +214,8 @@ const ContactSection: React.FC = () => {
                   variant="outlined"
                   size="small"
                   sx={{
-                    "& .MuiInputBase-root": { color: "#fff" },
-                    "& .MuiInputLabel-root": { color: "#fff" },
+                    "& .MuiInputBase-root": { color: "#fff", fontFamily: montserrat },
+                    "& .MuiInputLabel-root": { color: "#fff", fontFamily: montserrat },
                     "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,0.5)" },
                   }}
                 />
@@ -283,8 +231,8 @@ const ContactSection: React.FC = () => {
                     rows={4}
                     required
                     sx={{
-                      "& .MuiInputBase-root": { color: "#fff" },
-                      "& .MuiInputLabel-root": { color: "#fff" },
+                      "& .MuiInputBase-root": { color: "#fff", fontFamily: montserrat },
+                      "& .MuiInputLabel-root": { color: "#fff", fontFamily: montserrat },
                       "& .MuiOutlinedInput-notchedOutline": {
                         borderColor: "rgba(255,255,255,0.5)",
                       },
@@ -300,11 +248,14 @@ const ContactSection: React.FC = () => {
                     disabled={submitting}
                     sx={{
                       bgcolor: "#5f02ab",
-                      "&:hover": { bgcolor: "#320953" },
+                      "&:hover": { bgcolor: "#76046b" },
                       px: { xs: 3, sm: 4 },
                       py: { xs: 1, sm: 1.25 },
                       width: { xs: "100%", sm: "auto" },
                       borderRadius: 1.2,
+                      fontFamily: cinzel,
+                      fontWeight: 600,
+                      letterSpacing: ".15em",
                     }}
                     startIcon={
                       submitting ? <CircularProgress size={18} sx={{ color: "inherit" }} /> : null

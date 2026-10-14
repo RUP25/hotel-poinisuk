@@ -1,0 +1,22 @@
+/* TEAM */
+Hotel Poinisuk
+Location: Shillong, Meghalaya, India
+Site: https://www.hotelpoinisuk.com
+
+/* THE HOTEL */
+Name: Hotel Poinisuk
+Address: Lady Veronica Lane, Nongkynrih, Laitumkhrah (Police Point),
+         Shillong, Meghalaya 793003, India
+Phone: +91-364-7100030 / +91-87947-26831
+Email: reservation@hotelpoinisuk.com
+
+/* PROPERTIES */
+Restaurant: Dopwai (rooftop multi-cuisine)
+Lounge: Klong (cocktails, mocktails, live music)
+Events: Banquet Hall (capacity 200)
+
+/* TECHNOLOGY */
+Framework: Next.js
+UI: React + Material UI
+Hosting: Static export
+Last update: 2026

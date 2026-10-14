@@ -36,11 +36,13 @@ const PROPERTY_ID = "223NTUo30r6ZPJm6O5Mzg=";
 const GS_ID = "223NTUo30r6ZPJm6O5Mzg=";
 const ROOM_IDS = "226166,226165,226164,226163,226162";
 
-/** Optional date format helper if/when SwiftBook shares date keys */
-// function pad2(n: number) { return String(n).padStart(2, "0"); }
-// function formatDDMMYYYY(d: Date) {
-//   return `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()}`;
-// }
+/** Date format helpers — SwiftBook uses DD-MM-YYYY (matches what the booking UI renders) */
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+function formatDDMMYYYY(d: Date) {
+  return `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()}`;
+}
 
 export default function BookingRedirectForm() {
   const theme = useTheme();
@@ -105,8 +107,11 @@ export default function BookingRedirectForm() {
       return;
     }
 
-    // IMPORTANT: build the query string MANUALLY to avoid over-encoding commas/equals
-    // If SwiftBook shares date keys later (e.g., checkin/checkout), append them here.
+    // IMPORTANT: build the query string MANUALLY to avoid over-encoding commas/equals.
+    // SwiftBook accepts dates as `checkin` / `checkout` in DD-MM-YYYY format.
+    const cin = formatDDMMYYYY(checkIn!);
+    const cout = formatDDMMYYYY(checkOut!);
+
     const qs =
       `propertyId=${PROPERTY_ID}` +
       `&JDRN=Y` +
@@ -115,7 +120,9 @@ export default function BookingRedirectForm() {
       `&adult0=${adults}` +           // adults for room 0
       `&child0=${children}` +         // children for room 0
       `&ap=1` +
-      `&gsId=${GS_ID}`;
+      `&gsId=${GS_ID}` +
+      `&checkin=${cin}` +             // DD-MM-YYYY
+      `&checkout=${cout}`;             // DD-MM-YYYY
 
     const url = `${BASE}#/home?${qs}`;
     console.log("SwiftBook URL =>", url);
@@ -288,7 +295,7 @@ export default function BookingRedirectForm() {
               fontSize: "clamp(1rem, 2.2vw, 1.15rem)",
               bgcolor: "#5f02ab",
               borderRadius: 1.25,
-              "&:hover": { bgcolor: "#320953" },
+              "&:hover": { bgcolor: "#76046b" },
             }}
           >
             Search

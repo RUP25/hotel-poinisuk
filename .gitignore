@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -35,6 +36,12 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# local scratch
+.cursor-temp/
+
+# generated AWS stack state (contains the JWT signing secret)
+aws/deploy-events-stack/.events-stack-state.json
 
 # typescript
 *.tsbuildinfo

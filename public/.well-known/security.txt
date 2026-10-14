@@ -1,0 +1,10 @@
+# Security Policy for Hotel Poinisuk
+# https://www.hotelpoinisuk.com
+#
+# If you discover a security vulnerability, please let us know
+# at the contact below. Thank you for keeping our guests safe online.
+
+Contact: mailto:reservation@hotelpoinisuk.com
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://www.hotelpoinisuk.com/.well-known/security.txt

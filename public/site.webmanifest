@@ -1,0 +1,66 @@
+{
+  "name": "Hotel Poinisuk — Boutique Hotel in Shillong",
+  "short_name": "Hotel Poinisuk",
+  "description": "Boutique hotel in Shillong with rooftop dining at Dopwai, Klong Lounge, banquet hall, and easy access to Ward's Lake & Lady Hydari Park.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "background_color": "#ffffff",
+  "theme_color": "#5f02ab",
+  "categories": ["travel", "lifestyle", "food", "business"],
+  "icons": [
+    {
+      "src": "/favicon-48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo1.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/logo1.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/logo1.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/images/logo1.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Book a Room",
+      "short_name": "Book",
+      "description": "Reserve your stay at Hotel Poinisuk",
+      "url": "/booking",
+      "icons": [{ "src": "/images/logo1.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Rooms & Suites",
+      "short_name": "Rooms",
+      "url": "/rooms",
+      "icons": [{ "src": "/images/logo1.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Dopwai Restaurant",
+      "short_name": "Dopwai",
+      "url": "/dine",
+      "icons": [{ "src": "/images/logo1.png", "sizes": "96x96" }]
+    }
+  ]
+}

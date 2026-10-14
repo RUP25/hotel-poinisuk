@@ -3,10 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
+    "dev:turbopack": "next dev --turbopack",
     "build": "next build",
+    "postbuild": "next-sitemap",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "optimize:images": "node scripts/optimize-images.js",
+    "generate:favicon": "node scripts/generate-tab-favicon.js",
+    "deploy:events-aws": "npm install --no-fund --no-audit --prefix aws/deploy-events-stack && node aws/deploy-events-stack/deploy.cjs",
+    "cloudfront:html-rewrite": "npm install --no-fund --no-audit --prefix scripts/cloudfront-html-rewrite && node scripts/cloudfront-html-rewrite/attach.cjs"
   },
   "dependencies": {
     "@date-io/date-fns": "^3.2.1",
@@ -18,7 +24,7 @@
     "@mui/x-date-pickers": "^8.7.0",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.7",
-    "next": "15.3.4",
+    "next": "^15.5.18",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-slick": "^0.30.3",
@@ -29,6 +35,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-slick": "^0.23.13",
+    "next-sitemap": "^4.2.3",
+    "sharp": "^0.34.5",
+    "to-ico": "^1.1.5",
     "typescript": "^5"
   }
 }

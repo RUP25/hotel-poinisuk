@@ -1,25 +1,45 @@
 // components/TopBar.tsx
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
   Box,
   Button,
-  Typography,
-  useTheme,
-  useMediaQuery,
 } from "@mui/material";
-import PhoneIcon from "@mui/icons-material/Phone";
 import { motion, AnimatePresence } from "framer-motion";
 import HamburgerMenu from "./HamburgerMenu";
+import {
+  RESERVATION_URL,
+  PHONE_DISPLAY,
+  PHONE_HREF,
+  PURPLE,
+  PURPLE_HOVER,
+  LAVENDER,
+  SANS_UI,
+  HEADER_LOGO_ON_DARK_SRC,
+  HEADER_LOGO_W,
+  HEADER_LOGO_H,
+  STICKY_LOGO_SIZES,
+  stickyLogoWrapperSx,
+} from "@/lib/luxury-chrome";
+
+const utilityLinkSx = {
+  color: "rgba(255,255,255,0.92)",
+  fontFamily: SANS_UI,
+  fontWeight: 500,
+  fontSize: { xs: "0.68rem", sm: "0.72rem", md: "0.78rem" },
+  letterSpacing: { xs: "0.14em", md: "0.18em" },
+  textTransform: "uppercase" as const,
+  textDecoration: "none",
+  whiteSpace: "nowrap" as const,
+  transition: "color 220ms ease, opacity 220ms ease",
+  "&:hover": { color: LAVENDER, opacity: 1 },
+};
 
 const TopBar: React.FC = () => {
-  const theme = useTheme();
-  const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true });
-  const isXs = useMediaQuery(theme.breakpoints.only("xs"), { noSsr: true });
-
+  const headerRef = useRef<HTMLElement | null>(null);
   const [atTop, setAtTop] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -29,206 +49,129 @@ const TopBar: React.FC = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Motion variants (don’t change layout between SSR/CSR)
-  const barVariants = useMemo(
-    () => ({
-      hidden: reduceMotion ? { opacity: 0 } : { y: -20, opacity: 0 },
-      visible: reduceMotion
-        ? { opacity: 1, transition: { duration: 0.001 } }
-        : { y: 0, opacity: 1, transition: { when: "beforeChildren", staggerChildren: 0.08, duration: 0.3 } },
-    }),
-    [reduceMotion]
-  );
-  const itemVariants = useMemo(
-    () => ({
-      hidden: reduceMotion ? { opacity: 0 } : { y: -10, opacity: 0 },
-      visible: reduceMotion ? { opacity: 1 } : { y: 0, opacity: 1, transition: { duration: 0.25 } },
-    }),
-    [reduceMotion]
-  );
-
   return (
     <AnimatePresence initial={false}>
       {atTop && (
         <Box
-          component={motion.div}
-          variants={barVariants}
-          initial="hidden"
-          animate="visible"
-          exit="hidden"
+          component={motion.header}
+          ref={headerRef as React.Ref<HTMLElement>}
+          initial={false}
+          exit={{ opacity: 0, transition: { duration: 0.2 } }}
           sx={{
             position: "fixed",
-            top: { xs: "env(safe-area-inset-top)", md: 45 },
+            top: 0,
             left: 0,
             right: 0,
             zIndex: (t) => t.zIndex.appBar + 2,
-            display: "flex",
-            alignItems: "center",
-
-            // ✅ Pure CSS responsive heights — identical SSR/CSR
-            height: { xs: 70, sm: 80, md: 90, lg: 110 },
+            pt: "env(safe-area-inset-top, 0px)",
             px: { xs: 2, sm: 3, md: 4, lg: 5 },
-            py: { xs: 0.5, md: 0.5 },
-
-            bgcolor: "transparent",
-            backdropFilter: "blur(2px)",
-
-            "& > .topbar-inner": {
+            pointerEvents: "none",
+            "& a, & button": { pointerEvents: "auto" },
+          }}
+        >
+          <Box
+            sx={{
               width: "100%",
               maxWidth: 1440,
               mx: "auto",
-              display: "grid",
-              gridTemplateColumns: "1fr auto 1fr", // left / center (logo) / right
+              display: "flex",
               alignItems: "center",
-              gap: { xs: 1.25, sm: 1.25, md: 1.5 },
-              minWidth: 0,
-            },
-
-            pl: { xs: "calc(env(safe-area-inset-left, 0px) + 12px)", md: 3 },
-            pr: { xs: "calc(env(safe-area-inset-right, 0px) + 12px)", md: 3 },
-          }}
-        >
-          <Box className="topbar-inner">
-            {/* Left: Hamburger */}
+              justifyContent: "space-between",
+              gap: { xs: 1.5, md: 2 },
+              py: { xs: 0.75, md: 1 },
+              minHeight: { xs: 56, sm: 60, md: 64 },
+            }}
+          >
+            {/* Left: logo */}
             <Box
-              component={motion.div}
-              variants={itemVariants}
-              sx={{ gridColumn: 1, justifySelf: "start", display: "flex", alignItems: "center" }}
-            >
-              <HamburgerMenu open={drawerOpen} setOpen={setDrawerOpen} />
-            </Box>
-
-            {/* Center: Logo (click → Home) */}
-            <Box
+              component={Link}
+              href="/"
+              aria-label="Go to Home"
               sx={{
-                gridColumn: 2,
-                justifySelf: "center",
+                flex: "0 1 auto",
+                minWidth: 0,
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                minWidth: 0,
+                textDecoration: "none",
+                transition: "opacity 180ms ease",
+                "&:hover": { opacity: 0.88 },
               }}
             >
-              <Box
-                component={motion.div}
-                variants={itemVariants}
-                sx={{
-                  // responsive box that controls logo size; CSS-only
-                  height: { xs: 120, sm: 140, md: 160, lg: 180, xl: 200 },
-                  maxWidth: { xs: "46vw", sm: "40vw", md: "32vw", lg: "30vw", xl: "30vw" },
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Box
-                  component={Link}
-                  href="/"
-                  aria-label="Go to Home"
-                  sx={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "100%",
-                    height: "100%",
-                    cursor: "pointer",
-                    pointerEvents: "auto",
-                    "&:hover": { opacity: 0.92 },
-                  }}
-                >
-                  <Image
-                    src="/images/logo1.png"
-                    alt="Hotel Poinisuk"
-                    width={1200}
-                    height={450}
-                    priority
-                    sizes="(max-width:600px) 46vw,
-                           (max-width:900px) 40vw,
-                           (max-width:1200px) 32vw,
-                           (max-width:1536px) 30vw,
-                           30vw"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                      userSelect: "none",
-                      display: "block",
-                    }}
-                  />
-                </Box>
+              <Box sx={stickyLogoWrapperSx}>
+                <Image
+                  src={HEADER_LOGO_ON_DARK_SRC}
+                  alt="Hotel Poinisuk"
+                  width={HEADER_LOGO_W}
+                  height={HEADER_LOGO_H}
+                  priority
+                  sizes={STICKY_LOGO_SIZES}
+                />
               </Box>
             </Box>
 
-            {/* Right: Book Now + Phone */}
+            {/* Right: utility row */}
             <Box
-              component={motion.div}
-              variants={itemVariants}
               sx={{
-                gridColumn: 3,
-                justifySelf: "end",
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-end",
-                gap: 0.5,
-                minWidth: 0,
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: { xs: 1, sm: 1.5, md: 2, lg: 2.5 },
+                flexShrink: 0,
               }}
             >
-              <Button
-                variant="outlined"
-                href="https://www.swiftbook.io/inst/#/home?propertyId=223NTUo30r6ZPJm6O5Mzg=&JDRN=Y&RoomID=226166,226165,226164,226163,226162&noofrooms=1&adult0=1&child0=0&ap=1&gsId=223NTUo30r6ZPJm6O5Mzg="
-                aria-label="Jump to availability form"
-                sx={{
-                  color: "white",
-                  borderColor: "white",
-                  textTransform: "none",
-                  fontWeight: 700,
-                  lineHeight: 1.4,
-                  fontSize: { xs: "0.95rem", sm: "1.05rem", md: "1.1rem" },
-                  px: { xs: 1.5, sm: 2, md: 3 },
-                  py: { xs: 0.5, md: 0.75 },
-                  borderRadius: 0,
-                  whiteSpace: "nowrap",
-                  minHeight: 40,
-                  "&:hover": { borderColor: "white", bgcolor: "rgba(255,255,255,0.1)" },
-                }}
-              >
-                <>
-                  Book
-                  <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
-                    {" "}Now
-                  </Box>
-                </>
-              </Button>
-
               <Box
                 component="a"
-                href="tel:2093792606"
-                aria-label="Call Hotel Poinisuk"
+                href={PHONE_HREF}
+                aria-label={`Call Hotel Poinisuk at ${PHONE_DISPLAY}`}
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.75,
-                  color: "white",
-                  textDecoration: "none",
-                  mt: 0.25,
-                  "&:hover": { opacity: 0.9 },
+                  ...utilityLinkSx,
+                  display: { xs: "none", md: "inline" },
                 }}
               >
-                <PhoneIcon sx={{ fontSize: { xs: "1rem", sm: "1.15rem" } }} />
-                <Typography
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: { xs: "0.75rem", sm: "1rem" },
-                    lineHeight: 1,
-                    maxWidth: 220,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  (0364) 7100030
-                </Typography>
+                {PHONE_DISPLAY}
               </Box>
+
+              <Box
+                component={Link}
+                href="/booking"
+                sx={{
+                  ...utilityLinkSx,
+                  display: { xs: "none", sm: "inline" },
+                }}
+              >
+                My Booking
+              </Box>
+
+              <Button
+                href={RESERVATION_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Book your stay at Hotel Poinisuk"
+                sx={{
+                  bgcolor: PURPLE,
+                  color: "#fff",
+                  fontFamily: SANS_UI,
+                  fontWeight: 600,
+                  fontSize: { xs: "0.68rem", sm: "0.72rem", md: "0.78rem" },
+                  letterSpacing: { xs: "0.16em", md: "0.2em" },
+                  textTransform: "uppercase",
+                  lineHeight: 1,
+                  px: { xs: 1.6, sm: 2, md: 2.5 },
+                  py: { xs: 1, md: 1.1 },
+                  borderRadius: 0,
+                  minWidth: 0,
+                  boxShadow: "none",
+                  transition: "background-color 220ms ease",
+                  "&:hover": {
+                    bgcolor: PURPLE_HOVER,
+                    boxShadow: "none",
+                  },
+                }}
+              >
+                Book
+              </Button>
+
+              <HamburgerMenu open={drawerOpen} setOpen={setDrawerOpen} />
             </Box>
           </Box>
         </Box>

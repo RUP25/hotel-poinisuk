@@ -9,40 +9,48 @@ import {
   Link as MuiLink,
 } from "@mui/material";
 
-import RestaurantIcon from "@mui/icons-material/Restaurant";
-import LocalBarIcon from "@mui/icons-material/LocalBar";
-import WifiIcon from "@mui/icons-material/Wifi";
-import RoomServiceIcon from "@mui/icons-material/RoomService";
-import LocalLaundryServiceIcon from "@mui/icons-material/LocalLaundryService";
-import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
-import IronIcon from "@mui/icons-material/Iron";
-import CoffeeMakerIcon from "@mui/icons-material/CoffeeMaker";
-import BreakfastDiningIcon from "@mui/icons-material/BreakfastDining";
-import ContentCutIcon from "@mui/icons-material/ContentCut";
-import DryCleaningIcon from "@mui/icons-material/DryCleaning";
-import DirectionsCarFilledIcon from "@mui/icons-material/DirectionsCarFilled";
-import ThermostatIcon from "@mui/icons-material/Thermostat";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import PhoneIcon from "@mui/icons-material/Phone";
-import SupportAgentIcon from "@mui/icons-material/SupportAgent";
-import BlockIcon from "@mui/icons-material/Block";
-import AccessibleIcon from "@mui/icons-material/Accessible";
+// Outlined icon variants — lighter, more refined strokes that suit the brand
+import RestaurantIcon from "@mui/icons-material/RestaurantOutlined";
+import LocalBarIcon from "@mui/icons-material/LocalBarOutlined";
+import WifiIcon from "@mui/icons-material/WifiOutlined";
+import RoomServiceIcon from "@mui/icons-material/RoomServiceOutlined";
+import LocalLaundryServiceIcon from "@mui/icons-material/LocalLaundryServiceOutlined";
+import CleaningServicesIcon from "@mui/icons-material/CleaningServicesOutlined";
+import IronIcon from "@mui/icons-material/IronOutlined";
+import CoffeeMakerIcon from "@mui/icons-material/CoffeeMakerOutlined";
+import BreakfastDiningIcon from "@mui/icons-material/BreakfastDiningOutlined";
+import ContentCutIcon from "@mui/icons-material/ContentCutOutlined";
+import DryCleaningIcon from "@mui/icons-material/DryCleaningOutlined";
+import DirectionsCarFilledIcon from "@mui/icons-material/DirectionsCarOutlined";
+import ThermostatIcon from "@mui/icons-material/ThermostatOutlined";
+import AccessTimeIcon from "@mui/icons-material/AccessTimeOutlined";
+import PhoneIcon from "@mui/icons-material/PhoneOutlined";
+import SupportAgentIcon from "@mui/icons-material/SupportAgentOutlined";
+import BlockIcon from "@mui/icons-material/BlockOutlined";
+import AccessibleIcon from "@mui/icons-material/AccessibleOutlined";
 
 // New icons for the added amenities
-import LocalParkingIcon from "@mui/icons-material/LocalParking";
-import TravelExploreIcon from "@mui/icons-material/TravelExplore";
-import EventSeatIcon from "@mui/icons-material/EventSeat";
+import LocalParkingIcon from "@mui/icons-material/LocalParkingOutlined";
+import TravelExploreIcon from "@mui/icons-material/TravelExploreOutlined";
+import EventSeatIcon from "@mui/icons-material/EventSeatOutlined";
+
+// Hotel Poinisuk brand font stacks
+const cormorant = "var(--font-cormorant), 'Playfair Display', 'Georgia', serif";
+const cinzel = "var(--font-cinzel), var(--font-cormorant), 'Playfair Display', 'Georgia', serif";
+
+// Refined warm-walnut tone for icon strokes — harmonizes with the cream backdrop
+const ICON_TONE = "#5a4235";
 
 const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <Typography
     variant="h5"
-    align="center" // center the title text
+    align="center"
     sx={{
+      fontFamily: cormorant,
       fontWeight: 700,
       mb: 2.5,
       color: "#2b211b",
-      fontFamily: `'Georgia','Times New Roman',serif`,
-      textAlign: "center", // extra safety
+      textAlign: "center",
     }}
   >
     {children}
@@ -57,14 +65,32 @@ const AmenityItem: React.FC<{ icon: React.ReactNode; label: string }> = ({
   icon,
   label,
 }) => (
-  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.75 }}>
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1.75, py: 0.9 }}>
     <Box
       aria-hidden
-      sx={{ width: 28, height: 28, display: "grid", placeItems: "center", color: "#2e2a25" }}
+      sx={{
+        width: 36,
+        height: 36,
+        display: "grid",
+        placeItems: "center",
+        color: ICON_TONE,
+        flexShrink: 0,
+        "& svg": { fontSize: { xs: 24, md: 26 } },
+      }}
     >
       {icon}
     </Box>
-    <Typography sx={{ color: "#2f2a25" }}>{label}</Typography>
+    <Typography
+      sx={{
+        fontFamily: cormorant,
+        fontWeight: 500,
+        color: "#2f2a25",
+        fontSize: { xs: "1.12rem", md: "1.22rem" },
+        lineHeight: 1.45,
+      }}
+    >
+      {label}
+    </Typography>
   </Box>
 );
 
@@ -72,9 +98,31 @@ const InfoItem: React.FC<{ icon: React.ReactNode; text: React.ReactNode }> = ({
   icon,
   text,
 }) => (
-  <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, py: 0.75 }}>
-    <Box sx={{ width: 26, color: "#2e2a25" }}>{icon}</Box>
-    <Typography sx={{ color: "#2f2a25" }}>{text}</Typography>
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.9 }}>
+    <Box
+      sx={{
+        width: 36,
+        height: 36,
+        color: ICON_TONE,
+        display: "grid",
+        placeItems: "center",
+        flexShrink: 0,
+        "& svg": { fontSize: { xs: 24, md: 26 } },
+      }}
+    >
+      {icon}
+    </Box>
+    <Typography
+      sx={{
+        fontFamily: cormorant,
+        fontWeight: 500,
+        color: "#2f2a25",
+        fontSize: { xs: "1.12rem", md: "1.22rem" },
+        lineHeight: 1.45,
+      }}
+    >
+      {text}
+    </Typography>
   </Box>
 );
 
@@ -119,21 +167,24 @@ const GuestServices: React.FC = () => {
         <SectionTitle>Amenities</SectionTitle>
         <Box
           sx={{
+            maxWidth: { xs: "100%", sm: 640, md: 880, lg: 920 },
+            mx: "auto",
+            // shift the content rightward so the rows sit comfortably
+            // right of the heading's left edge.
+            pl: { xs: 0, sm: 2, md: 10, lg: 16 },
             display: "flex",
             flexWrap: "wrap",
-            justifyContent: "center", // center the rows
-            columnGap: { xs: 2, sm: 3 },
-            rowGap: { xs: 1, sm: 1.25 },
+            justifyContent: "center",
+            columnGap: { xs: 2, sm: 4, md: 5 },
+            rowGap: { xs: 1.25, sm: 1.5 },
           }}
         >
           {amenities.map((a, i) => (
             <Box
               key={i}
               sx={{
-                // fixed basis per breakpoint so centering works
-                flex: { xs: "0 0 100%", sm: "0 0 50%", md: "0 0 33.333%" },
-                maxWidth: { xs: "100%", sm: "50%", md: "33.333%" },
-                pr: { md: 2 },
+                flex: { xs: "0 0 100%", sm: "0 0 calc(50% - 16px)", md: "0 0 calc(50% - 20px)" },
+                maxWidth: { xs: "100%", sm: "calc(50% - 16px)", md: "calc(50% - 20px)" },
               }}
             >
               <AmenityItem icon={a.icon} label={a.label} />
@@ -147,61 +198,36 @@ const GuestServices: React.FC = () => {
         <SectionTitle>Hotel Information</SectionTitle>
         <Box
           sx={{
+            maxWidth: { xs: "100%", sm: 640, md: 880, lg: 920 },
+            mx: "auto",
+            // matches the Amenities grid offset so both blocks share the
+            // same horizontal alignment under their respective headings.
+            pl: { xs: 0, sm: 2, md: 10, lg: 16 },
             display: "flex",
             flexWrap: "wrap",
-            justifyContent: "center", // center the rows
-            columnGap: { xs: 2, sm: 3 },
-            rowGap: { xs: 1, sm: 1.25 },
+            justifyContent: "center",
+            columnGap: { xs: 2, sm: 4, md: 5 },
+            rowGap: { xs: 1.25, sm: 1.5 },
           }}
         >
-          <Box
-            sx={{
-              flex: { xs: "0 0 100%", sm: "0 0 50%", md: "0 0 33.333%" },
-              maxWidth: { xs: "100%", sm: "50%", md: "33.333%" },
-            }}
-          >
-            <InfoItem icon={<AccessTimeIcon />} text={<><strong>Check-in:</strong> 02:00 pm</>} />
-          </Box>
-          <Box
-            sx={{
-              flex: { xs: "0 0 100%", sm: "0 0 50%", md: "0 0 33.333%" },
-              maxWidth: { xs: "100%", sm: "50%", md: "33.333%" },
-            }}
-          >
-            <InfoItem icon={<AccessTimeIcon />} text={<><strong>Check-out:</strong> 12:00 pm</>} />
-          </Box>
-          <Box
-            sx={{
-              flex: { xs: "0 0 100%", sm: "0 0 50%", md: "0 0 33.333%" },
-              maxWidth: { xs: "100%", sm: "50%", md: "33.333%" },
-            }}
-          >
-            <InfoItem icon={<PhoneIcon />} text="+91 69093 90208" />
-          </Box>
-          <Box
-            sx={{
-              flex: { xs: "0 0 100%", sm: "0 0 50%", md: "0 0 33.333%" },
-              maxWidth: { xs: "100%", sm: "50%", md: "33.333%" },
-            }}
-          >
-            <InfoItem icon={<SupportAgentIcon />} text="24/7 Reception Desk" />
-          </Box>
-          <Box
-            sx={{
-              flex: { xs: "0 0 100%", sm: "0 0 50%", md: "0 0 33.333%" },
-              maxWidth: { xs: "100%", sm: "50%", md: "33.333%" },
-            }}
-          >
-            <InfoItem icon={<BlockIcon />} text="No Pets Allowed" />
-          </Box>
-          <Box
-            sx={{
-              flex: { xs: "0 0 100%", sm: "0 0 50%", md: "0 0 33.333%" },
-              maxWidth: { xs: "100%", sm: "50%", md: "33.333%" },
-            }}
-          >
-            <InfoItem icon={<AccessibleIcon />} text="Wheelchair Service" />
-          </Box>
+          {[
+            { icon: <AccessTimeIcon />, text: <><strong>Check-in:</strong> 02:00 pm</> },
+            { icon: <AccessTimeIcon />, text: <><strong>Check-out:</strong> 12:00 pm</> },
+            { icon: <PhoneIcon />, text: "+91 8794726831" },
+            { icon: <SupportAgentIcon />, text: "24/7 Reception Desk" },
+            { icon: <BlockIcon />, text: "No Pets Allowed" },
+            { icon: <AccessibleIcon />, text: "Wheelchair Service" },
+          ].map((item, i) => (
+            <Box
+              key={i}
+              sx={{
+                flex: { xs: "0 0 100%", sm: "0 0 calc(50% - 16px)", md: "0 0 calc(50% - 20px)" },
+                maxWidth: { xs: "100%", sm: "calc(50% - 16px)", md: "calc(50% - 20px)" },
+              }}
+            >
+              <InfoItem icon={item.icon} text={item.text} />
+            </Box>
+          ))}
         </Box>
 
         <Line />
@@ -222,19 +248,22 @@ const GuestServices: React.FC = () => {
               borderColor: "rgba(0,0,0,0.08)",
             }}
           >
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5 }}>
+            <Typography
+              variant="h6"
+              sx={{ fontFamily: cormorant, fontWeight: 700, mb: 1.5, color: "#2b211b" }}
+            >
               Property Details
             </Typography>
-            <Typography sx={{ mb: 1 }}>
+            <Typography sx={{ fontFamily: cormorant, fontWeight: 500, mb: 1 }}>
               <strong>Policies & Payments:</strong> All major Debit/Credit Cards. Contactless mobile payments supported.
             </Typography>
-            <Typography sx={{ mb: 1 }}>
+            <Typography sx={{ fontFamily: cormorant, fontWeight: 500, mb: 1 }}>
               <strong>Parking & Security:</strong> 24/7 free parking with security.
             </Typography>
-            <Typography sx={{ mb: 1 }}>
+            <Typography sx={{ fontFamily: cormorant, fontWeight: 500, mb: 1 }}>
               <strong>Business & Events:</strong> Banquet hall (up to 200 guests), conference room, in-house AV, DJ/Karaoke, live band.
             </Typography>
-            <Typography>
+            <Typography sx={{ fontFamily: cormorant, fontWeight: 500 }}>
               <strong>Doctor on Call</strong> available.
             </Typography>
           </Paper>
@@ -247,19 +276,22 @@ const GuestServices: React.FC = () => {
               borderColor: "rgba(0,0,0,0.08)",
             }}
           >
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5 }}>
+            <Typography
+              variant="h6"
+              sx={{ fontFamily: cormorant, fontWeight: 700, mb: 1.5, color: "#2b211b" }}
+            >
               FAQs
             </Typography>
-            <Typography sx={{ mb: 1 }}>
+            <Typography sx={{ fontFamily: cormorant, fontWeight: 500, mb: 1 }}>
               <strong>Languages:</strong> English, Hindi, Khasi, Assamese.
             </Typography>
-            <Typography sx={{ mb: 1 }}>
+            <Typography sx={{ fontFamily: cormorant, fontWeight: 500, mb: 1 }}>
               <strong>Early check-in/late check-out:</strong> Subject to availability.
             </Typography>
-            <Typography sx={{ mb: 1 }}>
+            <Typography sx={{ fontFamily: cormorant, fontWeight: 500, mb: 1 }}>
               <strong>Airport distance:</strong> Shillong ~32 km; Guwahati ~120 km.
             </Typography>
-            <Typography>
+            <Typography sx={{ fontFamily: cormorant, fontWeight: 500 }}>
               <strong>Nearby:</strong> Police Bazar (2 km), Ward’s Lake (1 km), Lady Hydari Park (2 km), Don Bosco Museum (5 km).
             </Typography>
           </Paper>
@@ -288,8 +320,24 @@ const GuestServices: React.FC = () => {
               sx={{ position: "absolute", inset: 0, border: 0, width: "100%", height: "100%" }}
             />
           </Box>
-          <Typography sx={{ mt: 1.5, textAlign: "right" }}>
-            <MuiLink href={directionsLink} target="_blank" rel="noopener noreferrer" underline="hover">
+          <Typography
+            sx={{
+              mt: 1.5,
+              textAlign: "right",
+              fontFamily: cinzel,
+              fontWeight: 500,
+              fontSize: { xs: "0.85rem", md: "0.9rem" },
+              letterSpacing: ".12em",
+              textTransform: "uppercase",
+            }}
+          >
+            <MuiLink
+              href={directionsLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{ color: "#5a4235", "&:hover": { color: "#3d2a1f" } }}
+            >
               Get Directions on Google Maps
             </MuiLink>
           </Typography>

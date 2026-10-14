@@ -1,12 +1,33 @@
 html, body {
   padding: 0;
   margin: 0;
-  font-family: Roboto, sans-serif;
+  /* Routed through the self-hosted CSS variable from next/font (lib/fonts.ts).
+     The fallback chain matches the variable's internal fallback so the page
+     stays legible even before the JS bundle has run. */
+  font-family: var(--font-montserrat), "Helvetica Neue", Arial, sans-serif;
   background-color: #fff;
   scroll-behavior: smooth;
 }
 * {
   box-sizing: border-box;
+}
+
+/* Ensure in-page hash anchors land below the unified sticky header
+   (TopBar Row 1 + Row 2). Sized for the largest header height with breathing room. */
+#banquet,
+#guest-services,
+#contact-section {
+  scroll-margin-top: 76px;
+}
+#welcome {
+  scroll-margin-top: 0;
+}
+@media (min-width: 900px) {
+  #banquet,
+  #guest-services,
+  #contact-section {
+    scroll-margin-top: 84px;
+  }
 }
 
 
@@ -21,4 +42,46 @@ html, body {
 
 .kenburns-0, .kenburns-1, .kenburns-2 {
   animation: kenburns 8s ease-in-out;
+}
+
+/* Hero content entrance. Pure CSS (not framer-motion) so the server and client
+   render identical markup — the hero is inside the SSR payload. */
+@keyframes heroRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes heroFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scrollCue {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(7px);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kenburns-0,
+  .kenburns-1,
+  .kenburns-2 {
+    animation: none;
+  }
 }

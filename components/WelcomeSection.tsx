@@ -2,6 +2,9 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import Image from "next/image";
+import HighlightsShowcase from "@/components/HighlightsShowcase";
+
+const cormorant = "var(--font-cormorant), 'Playfair Display', 'Georgia', serif";
 
 const WelcomeSection: React.FC = () => (
   <Box
@@ -10,53 +13,13 @@ const WelcomeSection: React.FC = () => (
     sx={{
       bgcolor: "#f1ecdbff",
       px: { xs: 2, sm: 3, md: 6 },
-      py: { xs: 5, sm: 7, md: 10 },
+      // no top padding: the showcase is a full-bleed wood block that runs
+      // straight on from the hero and carries the section heading itself
+      pt: 0,
+      pb: { xs: 5, sm: 7, md: 10 },
     }}
   >
-    {/* HEAD */}
-    <Box sx={{ maxWidth: 820, mx: "auto", textAlign: "center" }}>
-      <Typography
-        component="h2"
-        sx={{
-          fontFamily: "Georgia, serif",
-          fontWeight: 600,
-          lineHeight: 1.25,
-          letterSpacing: 0.3,
-          fontSize: {
-            xs: "clamp(1.6rem,5.6vw,2rem)",
-            md: "2.2rem",
-            lg: "2.35rem",
-          },
-        }}
-      >
-        Experience Bespoke Luxury
-        <br />
-        Where the hills meet the clouds
-      </Typography>
-
-      <Box
-        sx={{
-          width: 280,
-          height: 1.5,
-          bgcolor: "#918575ff",
-          mx: "auto",
-          my: { xs: 1.75, md: 2.25 },
-        }}
-      />
-
-      <Typography
-        sx={{
-          fontFamily: "Georgia, serif",
-          color: "text.secondary",
-          maxWidth: 720,
-          mx: "auto",
-          lineHeight: 1.6,
-          fontSize: { xs: "1rem", md: "1.3rem" },
-        }}
-      >
-        Designed for Shillong, made at Poinisuk. Each room features artisan-made teak furniture in Khasi wood, layered with soft linens, warm lighting, and amenities that matter—tea/coffee makers, speedy Wi-Fi, and heating in select categories.
-      </Typography>
-    </Box>
+    <HighlightsShowcase />
 
     {/* IMAGE + RIGHT COPY */}
     <Box
@@ -91,8 +54,10 @@ const WelcomeSection: React.FC = () => (
       {/* RIGHT COPY */}
       <Box sx={{ flex: 1, maxWidth: { xs: 680, md: 420 } }}>
         <Typography
+          component="p"
           sx={{
-            fontFamily: "Georgia, serif",
+            fontFamily: cormorant,
+            fontWeight: 500,
             color: "text.secondary",
             lineHeight: 1.8,
             fontSize: { xs: "1.03rem", md: "1.3rem" },
@@ -100,6 +65,20 @@ const WelcomeSection: React.FC = () => (
           }}
         >
           Hotel Poinisuk readies every room for city comfort with crisp linen bedding, modern in-room entertainment, and a 24/7 front desk—plus rooftop dining at Dopwai and signature drinks at Klong.
+        </Typography>
+        <Typography
+          component="p"
+          sx={{
+            fontFamily: cormorant,
+            fontWeight: 500,
+            color: "text.secondary",
+            lineHeight: 1.8,
+            fontSize: { xs: "1.03rem", md: "1.3rem" },
+            textAlign: { xs: "center", md: "left" },
+            mt: { xs: 2, md: 2.5 },
+          }}
+        >
+          Centrally located at Police Point in Laitumkhrah—a short drive from Ward&apos;s Lake and Lady Hydari Park—Hotel Poinisuk is consistently rated among the best boutique hotels in Shillong for both leisure and business stays.
         </Typography>
       </Box>
     </Box>

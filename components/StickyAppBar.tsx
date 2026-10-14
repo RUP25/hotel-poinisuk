@@ -1,7 +1,7 @@
 // components/StickyAppBar.tsx
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -9,39 +9,43 @@ import {
   Toolbar,
   Button,
   Box,
-  Typography,
-  useMediaQuery,
-  useTheme,
-  Link as MuiLink, // ← MUI Link alias
 } from "@mui/material";
-import PhoneIcon from "@mui/icons-material/Phone";
 import { motion, AnimatePresence } from "framer-motion";
 import HamburgerMenu from "./HamburgerMenu";
+import {
+  RESERVATION_URL,
+  PHONE_DISPLAY,
+  PHONE_HREF,
+  PURPLE,
+  PURPLE_DEEP,
+  PURPLE_HOVER,
+  LAVENDER_GLASS,
+  LAVENDER_GLASS_BORDER,
+  SANS_UI,
+  HEADER_LOGO_SRC,
+  HEADER_LOGO_W,
+  HEADER_LOGO_H,
+  STICKY_LOGO_SIZES,
+  stickyLogoWrapperSx,
+} from "@/lib/luxury-chrome";
 
-/* -------------------- sizing -------------------- */
-const BAR_HEIGHT = { xs: 100, sm: 72, md: 140, lg: 128, xl: 136 };
-
-/* Responsive logo width (as a percentage of viewport width) */
-const LOGO_VW = { xs: "33vw", sm: "16vw", md: "14vw", lg: "12vw", xl: "9vw" };
-
-/* Optional: a hard pixel max so it doesn't get too huge on tablets in landscape */
-const LOGO_MAX_PX = 520;
-
-/* ---------- tweak these offsets to move the logo ---------- */
-/* Positive X moves right; positive Y moves down (in pixels). */
-const LOGO_SHIFT_X = { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 };
-const LOGO_SHIFT_Y = { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 };
+const utilityLinkSx = {
+  color: "rgba(50, 9, 83, 0.92)",
+  fontFamily: SANS_UI,
+  fontWeight: 500,
+  fontSize: { xs: "0.68rem", sm: "0.72rem", md: "0.78rem" },
+  letterSpacing: { xs: "0.14em", md: "0.18em" },
+  textTransform: "uppercase" as const,
+  textDecoration: "none",
+  whiteSpace: "nowrap" as const,
+  transition: "color 220ms ease",
+  "&:hover": { color: PURPLE },
+};
 
 const StickyAppBar: React.FC = () => {
-  const theme = useTheme();
+  const headerRef = useRef<HTMLElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"), { noSsr: true });
-  const isMdUp = useMediaQuery(theme.breakpoints.up("md"), { noSsr: true });
-  const isLgUp = useMediaQuery(theme.breakpoints.up("lg"), { noSsr: true });
-  const isXlUp = useMediaQuery(theme.breakpoints.up("xl"), { noSsr: true });
-  const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 0);
@@ -50,192 +54,142 @@ const StickyAppBar: React.FC = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const barHeight = useMemo(() => {
-    if (isXlUp) return BAR_HEIGHT.xl;
-    if (isLgUp) return BAR_HEIGHT.lg;
-    if (isMdUp) return BAR_HEIGHT.md;
-    if (isSmUp) return BAR_HEIGHT.sm;
-    return BAR_HEIGHT.xs;
-  }, [isSmUp, isMdUp, isLgUp, isXlUp]);
-
-  const barVariants = useMemo(
-    () => ({
-      hidden: reduceMotion ? { opacity: 0 } : { y: -barHeight, opacity: 0 },
-      visible: reduceMotion
-        ? { opacity: 1, transition: { duration: 0.001 } }
-        : { y: 0, opacity: 1, transition: { when: "beforeChildren", staggerChildren: 0.08, duration: 0.3 } },
-    }),
-    [barHeight, reduceMotion]
-  );
-
-  const itemVariants = useMemo(
-    () => ({
-      hidden: reduceMotion ? { opacity: 0 } : { y: -10, opacity: 0 },
-      visible: reduceMotion ? { opacity: 1 } : { y: 0, opacity: 1, transition: { duration: 0.25 } },
-    }),
-    [reduceMotion]
-  );
-
   return (
-    <AnimatePresence>
+    <AnimatePresence initial={false}>
       {scrolled && (
-        <motion.div
-          variants={barVariants}
-          initial="hidden"
-          animate="visible"
-          exit="hidden"
-          style={{
+        <Box
+          component={motion.div}
+          ref={headerRef as React.Ref<HTMLElement>}
+          initial={{ y: -72, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -72, opacity: 0 }}
+          transition={{ duration: 0.28 }}
+          sx={{
             position: "fixed",
-            top: "env(safe-area-inset-top)",
+            top: 0,
             left: 0,
             right: 0,
-            zIndex: theme.zIndex.appBar + 1,
+            zIndex: (t) => t.zIndex.appBar + 1,
           }}
         >
           <AppBar
             color="transparent"
-            elevation={4}
+            elevation={0}
             sx={{
-              height: barHeight,
-              backgroundColor: "rgba(101, 91, 109, 0.55)",
-              backdropFilter: "saturate(120%) blur(8px)",
-              WebkitBackdropFilter: "saturate(120%) blur(8px)",
-              boxShadow: "0 2px 10px rgba(165, 152, 152, 0.18)",
-              px: { xs: 1.25, sm: 2, md: 3, lg: 4 },
-              pl: { xs: "calc(env(safe-area-inset-left, 0px) + 10px)", md: 3 },
-              pr: { xs: "calc(env(safe-area-inset-right, 0px) + 10px)", md: 3 },
+              backgroundColor: LAVENDER_GLASS,
+              backdropFilter: "saturate(160%) blur(14px)",
+              WebkitBackdropFilter: "saturate(160%) blur(14px)",
+              boxShadow: `0 1px 0 ${LAVENDER_GLASS_BORDER}`,
+              pt: "env(safe-area-inset-top, 0px)",
+              px: { xs: 2, sm: 3, md: 4, lg: 5 },
             }}
           >
             <Toolbar
               disableGutters
               sx={{
-                position: "relative",
-                minHeight: barHeight,
-                height: barHeight,
+                minHeight: { xs: 56, sm: 60, md: 64 },
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: { xs: 1, sm: 1.25, md: 1.5 },
+                gap: 2,
+                py: { xs: 0.75, md: 1 },
+                width: "100%",
+                maxWidth: 1440,
+                mx: "auto",
               }}
             >
-              {/* Left: Hamburger */}
-              <motion.div variants={itemVariants} style={{ display: "flex", alignItems: "center" }}>
-                <HamburgerMenu open={menuOpen} setOpen={setMenuOpen} />
-              </motion.div>
-
-              {/* ABSOLUTE CENTERED LOGO (click → home) */}
               <Box
+                component={Link}
+                href="/"
+                aria-label="Go to Home"
                 sx={{
-                  position: "absolute",
-                  left: {
-                    xs: `calc(50% + ${LOGO_SHIFT_X.xs}px)`,
-                    sm: `calc(50% + ${LOGO_SHIFT_X.sm}px)`,
-                    md: `calc(50% + ${LOGO_SHIFT_X.md}px)`,
-                    lg: `calc(50% + ${LOGO_SHIFT_X.lg}px)`,
-                    xl: `calc(50% + ${LOGO_SHIFT_X.xl}px)`,
-                  },
-                  top: {
-                    xs: `calc(50% + ${LOGO_SHIFT_Y.xs}px)`,
-                    sm: `calc(50% + ${LOGO_SHIFT_Y.sm}px)`,
-                    md: `calc(50% + ${LOGO_SHIFT_Y.md}px)`,
-                    lg: `calc(50% + ${LOGO_SHIFT_Y.lg}px)`,
-                    xl: `calc(50% + ${LOGO_SHIFT_Y.xl}px)`,
-                  },
-                  transform: "translate(-50%, -50%)",
-                  pointerEvents: "auto",
-                  zIndex: 0,
+                  flex: "0 1 auto",
+                  minWidth: 0,
                   display: "flex",
-                  justifyContent: "center",
                   alignItems: "center",
-                  width: { xs: LOGO_VW.xs, sm: LOGO_VW.sm, md: LOGO_VW.md, lg: LOGO_VW.lg, xl: LOGO_VW.xl },
-                  maxWidth: LOGO_MAX_PX,
+                  textDecoration: "none",
+                  transition: "opacity 180ms ease",
+                  "&:hover": { opacity: 0.88 },
                 }}
               >
-                <Box
-                  component={Link}
-                  href="/"
-                  aria-label="Go to Home"
-                  sx={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "100%",
-                    transition: "opacity 120ms ease",
-                    "&:hover": { opacity: 0.9 },
-                  }}
-                >
+                <Box sx={stickyLogoWrapperSx}>
                   <Image
-                    src="/images/logo1.png"
+                    src={HEADER_LOGO_SRC}
                     alt="Hotel Poinisuk"
-                    width={1200}
-                    height={500}
+                    width={HEADER_LOGO_W}
+                    height={HEADER_LOGO_H}
                     priority
-                    sizes="(max-width:600px) 58vw,(max-width:900px) 40vw,(max-width:1200px) 28vw,(max-width:1536px) 22vw,16vw"
-                    style={{
-                      width: "100%",
-                      height: "auto",
-                      objectFit: "contain",
-                      userSelect: "none",
-                    }}
+                    sizes={STICKY_LOGO_SIZES}
                   />
                 </Box>
               </Box>
 
-              {/* Right: Book Now + Phone */}
-              <motion.div
-                variants={itemVariants}
-                style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: { xs: 1, sm: 1.5, md: 2 },
+                  flexShrink: 0,
+                }}
               >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  href="https://www.swiftbook.io/inst/#/home?propertyId=223NTUo30r6ZPJm6O5Mzg=&JDRN=Y&RoomID=226166,226165,226164,226163,226162&noofrooms=1&adult0=1&child0=0&ap=1&gsId=223NTUo30r6ZPJm6O5Mzg="
+                <Box
+                  component="a"
+                  href={PHONE_HREF}
                   sx={{
-                    fontSize: { xs: "0.95rem", md: "1.3rem" },
-                    fontWeight: 700,
-                    textTransform: "none",
-                    lineHeight: 1.25,
-                    px: { xs: 1.75, md: 2.5 },
-                    py: { xs: 0.6, md: 0.75 },
+                    ...utilityLinkSx,
+                    display: { xs: "none", md: "inline" },
+                  }}
+                >
+                  {PHONE_DISPLAY}
+                </Box>
+
+                <Box
+                  component={Link}
+                  href="/booking"
+                  sx={{
+                    ...utilityLinkSx,
+                    display: { xs: "none", sm: "inline" },
+                  }}
+                >
+                  My Booking
+                </Box>
+
+                <Button
+                  href={RESERVATION_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    bgcolor: PURPLE,
+                    color: "#fff",
+                    fontFamily: SANS_UI,
+                    fontWeight: 600,
+                    fontSize: { xs: "0.68rem", md: "0.78rem" },
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    px: { xs: 1.6, md: 2.5 },
+                    py: { xs: 0.9, md: 1.1 },
                     borderRadius: 0,
                     boxShadow: "none",
+                    "&:hover": { bgcolor: PURPLE_HOVER, boxShadow: "none" },
                   }}
                 >
-                  <>
-                    Book
-                    <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
-                      {" "}Now
-                    </Box>
-                  </>
+                  Book
                 </Button>
 
-                {/* Clickable phone number */}
-                <MuiLink
-                  href="tel:+913647100030"
-                  aria-label="Call Hotel Poinisuk at (0364) 7100030"
-                  underline="none"
-                  color="inherit"
+                <Box
                   sx={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    mt: 0.5,
-                    color: "rgba(255,255,255,0.9)",
-                    "&:hover": { opacity: 0.9 },
+                    "& .MuiIconButton-root": {
+                      color: PURPLE_DEEP,
+                      "&:hover": { color: PURPLE },
+                    },
                   }}
                 >
-                  <PhoneIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
-                  <Typography
-                    component="span"
-                    sx={{ fontWeight: 700, fontSize: { xs: "0.75rem", md: "1.05rem" }, lineHeight: 1 }}
-                  >
-                    (0364) 7100030
-                  </Typography>
-                </MuiLink>
-              </motion.div>
+                  <HamburgerMenu open={menuOpen} setOpen={setMenuOpen} />
+                </Box>
+              </Box>
             </Toolbar>
           </AppBar>
-        </motion.div>
+        </Box>
       )}
     </AnimatePresence>
   );

@@ -32,7 +32,7 @@ const PurpleButton = styled(Button)({
   backgroundColor: "#5f02ab",
   borderRadius: 8,
   fontWeight: 700,
-  "&:hover": { backgroundColor: "#320953" },
+  "&:hover": { backgroundColor: "#76046b" },
 });
 
 const roomTypes = [
@@ -171,7 +171,7 @@ const BookingPage: React.FC = () => {
               fontWeight: 800,
               mb: 3,
               lineHeight: 1.15,
-              fontFamily: "'Montserrat', sans-serif",
+              fontFamily: "var(--font-montserrat), 'Helvetica Neue', Arial, sans-serif",
               textAlign: "center",
               fontSize: { xs: "2rem", md: "2.5rem" },
             }}
@@ -405,7 +405,41 @@ const BookingPage: React.FC = () => {
 (BookingPage as any).seo = {
   title: "Booking",
   description:
-    "Book your stay at Hotel Poinisuk, Shillong — best rates, secure reservations, and flexible dates.",
-  ogImage: "/images/og/booking.jpg",
+    "Book your stay at Hotel Poinisuk, Shillong — best rates, secure reservations, flexible dates, and easy booking process. Reserve your room today.",
+  keywords:
+    "hotel booking Shillong, book hotel Shillong, hotel reservation Shillong, Shillong hotel booking, Hotel Poinisuk booking",
+  ogImage: "/images/image6.webp",
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Book Your Stay — Hotel Poinisuk",
+    url: "https://www.hotelpoinisuk.com/booking",
+    description:
+      "Book your stay at Hotel Poinisuk, Shillong — best rates, secure reservations, flexible dates.",
+    isPartOf: { "@id": "https://www.hotelpoinisuk.com#website" },
+    about: { "@id": "https://www.hotelpoinisuk.com#hotel" },
+    inLanguage: "en-IN",
+    primaryImageOfPage: {
+      "@type": "ImageObject",
+      url: "https://www.hotelpoinisuk.com/images/image6.webp",
+    },
+    potentialAction: {
+      "@type": "ReserveAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate:
+          "https://www.swiftbook.io/inst/#/home?propertyId=223NTUo30r6ZPJm6O5Mzg=&JDRN=Y&RoomID=226166,226165,226164,226163,226162&noofrooms=1&adult0=1&child0=0&ap=1&gsId=223NTUo30r6ZPJm6O5Mzg=",
+        inLanguage: "en-IN",
+        actionPlatform: [
+          "http://schema.org/DesktopWebPlatform",
+          "http://schema.org/MobileWebPlatform",
+        ],
+      },
+      result: {
+        "@type": "LodgingReservation",
+        name: "Hotel Poinisuk Reservation",
+      },
+    },
+  },
 };
 export default BookingPage;

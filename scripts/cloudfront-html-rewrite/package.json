@@ -1,0 +1,11 @@
+{
+  "name": "hotel-poinisuk-cloudfront-html-rewrite",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Publish append-.html CloudFront Function and attach to a distribution (static Next export).",
+  "dependencies": {
+    "@aws-sdk/client-cloudfront": "^3.620.0",
+    "@aws-sdk/client-sts": "^3.620.0",
+    "hotel-poinisuk": "file:../.."
+  }
+}

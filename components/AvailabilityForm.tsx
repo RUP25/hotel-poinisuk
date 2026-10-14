@@ -427,7 +427,7 @@ const AvailabilityForm: React.FC<AvailabilityFormProps> = ({ onCheckRates }) => 
               fontSize: "clamp(1rem, 2.2vw, 1.15rem)",
               bgcolor: "#5f02ab",
               borderRadius: 1.25,
-              "&:hover": { bgcolor: "#320953" },
+              "&:hover": { bgcolor: "#76046b" },
             }}
           >
             CHECK RATES
