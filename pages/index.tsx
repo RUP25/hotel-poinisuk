@@ -48,6 +48,10 @@ const heroImages = [
   { src: '/images/hero-klong-2k.jpg', alt: 'Klong lounge and bar at Hotel Poinisuk' },
 ];
 
+/** "video" plays the film. Set this to "slides" to restore the photo carousel. */
+const HERO_MODE: "video" | "slides" = "video";
+const HERO_VIDEO_SRC = "/videos/hero-mvp.mp4";
+
 // IMPORTANT: titles drive grid placement only (labels are hidden in the component)
 const features = [
   { title: 'Poinisuk',          image: '/images/rooms/suite-king.jpg',         href: '/rooms' },
@@ -176,12 +180,16 @@ const Home: NextPageWithSeo = () => {
       {/* Preload the LCP hero image so the browser starts downloading it before
           react-slick hydrates. Critical for Largest Contentful Paint on home. */}
       <Head>
-        <link
-          rel="preload"
-          as="image"
-          href={heroImages[0].src}
-          fetchPriority="high"
-        />
+        {HERO_MODE === "video" ? (
+          <link rel="preload" as="video" href={HERO_VIDEO_SRC} fetchPriority="high" />
+        ) : (
+          <link
+            rel="preload"
+            as="image"
+            href={heroImages[0].src}
+            fetchPriority="high"
+          />
+        )}
       </Head>
 
       {/* ─── HERO (full viewport, luxury editorial) ─── */}
@@ -205,6 +213,58 @@ const Home: NextPageWithSeo = () => {
         }}
       >
 
+        {HERO_MODE === "video" && !prefersReducedMotion ? (
+          <Box
+            aria-hidden="true"
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 0,
+              pointerEvents: 'none',
+              overflow: 'hidden',
+            }}
+          >
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              poster={heroImages[0].src}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                filter: 'brightness(0.88) saturate(0.95)',
+              }}
+            >
+              <source src={HERO_VIDEO_SRC} type="video/mp4" />
+            </video>
+          </Box>
+        ) : HERO_MODE === "video" ? (
+          <Box
+            aria-hidden="true"
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 0,
+              pointerEvents: 'none',
+              overflow: 'hidden',
+            }}
+          >
+            <Image
+              src={heroImages[0].src}
+              alt={heroImages[0].alt}
+              fill
+              priority
+              sizes="100vw"
+              style={{
+                objectFit: 'cover',
+                filter: 'brightness(0.88) saturate(0.95)',
+              }}
+            />
+          </Box>
+        ) : (
+          <>
         {/* SSR-rendered static slide 0 — this is the actual LCP element.
             It exists in the initial HTML so the browser can start downloading
             the hero image as early as possible, without waiting for the
@@ -274,6 +334,8 @@ const Home: NextPageWithSeo = () => {
             ))}
           </Slider>
         </Box>
+          </>
+        )}
 
         {/* Cinematic overlay — a centre vignette for headline legibility plus a
             vertical wash that anchors the utility rail at the bottom. */}

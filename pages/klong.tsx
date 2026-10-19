@@ -10,6 +10,11 @@ import Footer from "@/components/Footer";
 import ContactDialog from "@/components/ContactDialog";
 import type { NextPageWithSeo } from "@/types/next-page-with-seo";
 
+const KLONG_HERO_IMAGE = "/images/bar/masthead.jpeg";
+/** "video" plays the film. Set this to "image" to restore the lounge photo. */
+const KLONG_HERO_MODE: "video" | "image" = "video";
+const KLONG_HERO_VIDEO = "/videos/klong-hero.mp4";
+
 function KlongPage() {
   const serif = "var(--font-cormorant), 'Playfair Display', 'Georgia', 'Times New Roman', serif";
   const cormorant = "var(--font-cormorant), 'Playfair Display', 'Georgia', serif";
@@ -149,18 +154,38 @@ function KlongPage() {
               inset: 0,
             }}
           >
-            <Image
-              src="/images/bar/masthead.jpeg"
-              alt="Klong Lounge ambience"
-              fill
-              priority
-              sizes="100vw"
-              style={{
-                objectFit: "cover",
-                objectPosition: "center center",
-                filter: "brightness(0.82) contrast(1.12) saturate(1.05) hue-rotate(-6deg)",
-              }}
-            />
+            {KLONG_HERO_MODE === "video" ? (
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster={KLONG_HERO_IMAGE}
+                aria-hidden="true"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "center center",
+                  filter: "brightness(0.82) contrast(1.12) saturate(1.05) hue-rotate(-6deg)",
+                }}
+              >
+                <source src={KLONG_HERO_VIDEO} type="video/mp4" />
+              </video>
+            ) : (
+              <Image
+                src={KLONG_HERO_IMAGE}
+                alt="Klong Lounge ambience"
+                fill
+                priority
+                sizes="100vw"
+                style={{
+                  objectFit: "cover",
+                  objectPosition: "center center",
+                  filter: "brightness(0.82) contrast(1.12) saturate(1.05) hue-rotate(-6deg)",
+                }}
+              />
+            )}
           </Box>
 
           {/* Night-tone gradient: deep top, midnight-indigo bottom */}
@@ -973,10 +998,8 @@ function KlongPage() {
                 { src: "/images/bar/gallery-sign.jpg", alt: "Klong sign above the bar", pos: "center", fit: "cover" },
                 { src: "/images/bar/bar.jpg",        alt: "Klong Lounge bar setting",          pos: "center top",    fit: "cover"   },
                 { src: "/images/bar/bar3.jpg",       alt: "Bar counter at Klong Lounge",       pos: "center top",    fit: "cover"   },
-                { src: "/images/dine/dine10.jpeg",   alt: "Cocktail close-up at Klong Lounge", pos: "center",        fit: "contain" },
                 { src: "/images/bar/klongbar.jpg",   alt: "Klong Lounge ambience",             pos: "center top",    fit: "cover"   },
                 { src: "/images/bar/masthead1.jpeg", alt: "Klong Lounge atmosphere",           pos: "center top",    fit: "cover"   },
-                { src: "/images/bar/masthead2.jpeg", alt: "Klong Lounge evening view",         pos: "center top",    fit: "contain" },
               ] as const).map((img, i) => (
                 <Box
                   key={img.src}

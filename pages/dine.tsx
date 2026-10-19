@@ -8,6 +8,11 @@ import Footer from "@/components/Footer";
 import ContactDialog from "@/components/ContactDialog";
 import type { NextPageWithSeo } from "@/types/next-page-with-seo";
 
+const DOPWAI_HERO_IMAGE = "/images/dine/masthead2.jpeg";
+/** "video" plays the film. Set this to "image" to restore the rooftop photo. */
+const DOPWAI_HERO_MODE: "video" | "image" = "video";
+const DOPWAI_HERO_VIDEO = "/videos/dopwai-hero.mp4";
+
 const DinePage: NextPageWithSeo = () => {
   const serif = "var(--font-cormorant), 'Playfair Display', 'Georgia', 'Times New Roman', serif";
   const cormorant = "var(--font-cormorant), 'Playfair Display', 'Georgia', serif";
@@ -108,18 +113,38 @@ const DinePage: NextPageWithSeo = () => {
               inset: 0,
             }}
           >
-            <Image
-              src="/images/dine/masthead2.jpeg"
-              alt="Vacation retreat"
-              fill
-              priority
-              sizes="100vw"
-              style={{
-                objectFit: "cover",
-                objectPosition: "center center",
-                filter: "brightness(1.08) contrast(1.08) saturate(1.05)",
-              }}
-            />
+            {DOPWAI_HERO_MODE === "video" ? (
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster={DOPWAI_HERO_IMAGE}
+                aria-hidden="true"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "center center",
+                  filter: "brightness(1.08) contrast(1.08) saturate(1.05)",
+                }}
+              >
+                <source src={DOPWAI_HERO_VIDEO} type="video/mp4" />
+              </video>
+            ) : (
+              <Image
+                src={DOPWAI_HERO_IMAGE}
+                alt="Dopwai rooftop dining at Hotel Poinisuk"
+                fill
+                priority
+                sizes="100vw"
+                style={{
+                  objectFit: "cover",
+                  objectPosition: "center center",
+                  filter: "brightness(1.08) contrast(1.08) saturate(1.05)",
+                }}
+              />
+            )}
           </Box>
           <Box sx={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(12,15,20,0.06) 0%, rgba(12,15,20,0.18) 100%)" }} />
           <Box
